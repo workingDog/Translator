@@ -23,7 +23,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                horizontalImagesView
+                selectedImagesView
                 if let errorMessage = translator.errorMessage {
                     Text(errorMessage).foregroundStyle(.red)
                 }
@@ -66,7 +66,7 @@ struct ContentView: View {
     }
     
     @ViewBuilder
-    var horizontalImagesView: some View {
+    var selectedImagesView: some View {
         ScrollView(.horizontal) {
             HStack {
                 ForEach(selectedImages) { imgItem in

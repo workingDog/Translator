@@ -37,6 +37,7 @@ struct EnglishView: View {
                 target: Locale.Language(identifier: "en")
             )
         }
+        // when translator.translationConfiguration changed, it will activate this task
         .translationTask(translator.translationConfiguration) { session in
             print("----> EnglishView translationTask")
             await translator.translate(using: session)

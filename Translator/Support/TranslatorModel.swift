@@ -41,37 +41,26 @@ final class TranslatorModel {
         isProcessing = true
 
         do {
-            let text = try await OCRService().recognizeJapaneseText(from: image)
+            let items = try await OCRService().recognizeJapaneseText(from: image)
+            let text = items.reconstructedText() // see Utility Array extension
 
             japaneseText = text
 
-            guard !text.trimmingCharacters(in: .whitespacesAndNewlines)
-                .isEmpty else {
+            guard !text.trim().isEmpty else {
                 errorMessage = "No Japanese text was recognized."
                 isProcessing = false
                 return
             }
-
-            translationConfiguration = TranslationSession.Configuration(
-                source: Locale.Language(identifier: "ja"),
-                target: Locale.Language(identifier: "en")
-            )
-
         } catch {
             errorMessage = error.localizedDescription
         }
-
         isProcessing = false
     }
 
     func translate(using session: TranslationSession) async {
         isProcessing = true
         let source = japaneseText.trim()
-
-        guard !source.isEmpty else {
-            return
-        }
-
+        guard !source.isEmpty else { return }
         do {
             let response = try await session.translate(source)
             englishText = response.targetText

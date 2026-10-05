@@ -10,34 +10,41 @@ import UIKit
 import ImageIO
 
 
+struct OCRTextItem: Identifiable {
+    let id = UUID()
+    let text: String
+    let boundingBox: CGRect
+}
+
 struct OCRService {
-    func recognizeJapaneseText(from image: UIImage) async throws -> String {
+
+    func recognizeJapaneseText(from image: UIImage) async throws -> [OCRTextItem] {
         guard let cgImage = image.cgImage else {
             throw OCRError.invalidImage
         }
-
         return try await Task.detached(priority: .userInitiated) {
             let request = VNRecognizeTextRequest()
-
             request.recognitionLevel = .accurate
             request.usesLanguageCorrection = true
             request.recognitionLanguages = ["ja-JP"]
-
-            let handler = VNImageRequestHandler(
+            
+            let handler = await VNImageRequestHandler(
                 cgImage: cgImage,
                 orientation: image.cgImagePropertyOrientation,
                 options: [:]
             )
-
+            
             try handler.perform([request])
-
-            return (request.results ?? [])
-                .compactMap { observation in
-                    observation.topCandidates(1).first?.string
+            
+            return (request.results ?? []).compactMap { observation -> OCRTextItem? in
+                guard let text = observation.topCandidates(1).first?.string else {
+                    return nil
                 }
-                .joined(separator: "\n")
+                return OCRTextItem(text: text, boundingBox: observation.boundingBox)
+            }
         }.value
     }
+
 }
 
 enum OCRError: LocalizedError {
@@ -45,33 +52,7 @@ enum OCRError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .invalidImage:
-            "The selected image could not be read."
-        }
-    }
-}
-
-extension UIImage {
-    var cgImagePropertyOrientation: CGImagePropertyOrientation {
-        switch imageOrientation {
-        case .up:
-            .up
-        case .down:
-            .down
-        case .left:
-            .left
-        case .right:
-            .right
-        case .upMirrored:
-            .upMirrored
-        case .downMirrored:
-            .downMirrored
-        case .leftMirrored:
-            .leftMirrored
-        case .rightMirrored:
-            .rightMirrored
-        @unknown default:
-            .up
+        case .invalidImage: "The selected image could not be read."
         }
     }
 }
