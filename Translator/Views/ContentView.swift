@@ -29,7 +29,7 @@ struct ContentView: View {
                 }
             }
             .padding()
-            .navigationTitle("Menu Translator")
+            .navigationTitle("Translator")
             .navigationDestination(item: $route) { route in
                 switch route {
                     case .japanese: JapaneseView(route: $route)
