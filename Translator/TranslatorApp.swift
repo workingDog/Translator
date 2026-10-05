@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct TranslatorApp: App {
+    @State private var translator = TranslatorModel()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(translator)
         }
     }
 }

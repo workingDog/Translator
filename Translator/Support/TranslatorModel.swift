@@ -1,5 +1,5 @@
 //
-//  MenuTranslatorModel.swift
+//  TranslatorModel.swift
 //  Translator
 //
 //  Created by Ringo Wathelet on 2026/10/05.
@@ -15,7 +15,8 @@ import PhotosUI
 
 @MainActor
 @Observable
-final class MenuTranslatorModel {
+final class TranslatorModel {
+    
     var selectedImage: UIImage?
     var japaneseText = ""
     var englishText = ""
@@ -26,17 +27,21 @@ final class MenuTranslatorModel {
     // a new translation configuration.
     var translationConfiguration: TranslationSession.Configuration?
 
-    func process(image: UIImage) async {
-        selectedImage = image
+    
+    func doRecognition() async {
+        if let img = selectedImage {
+            await process(image: img)
+        }
+    }
+    
+    private func process(image: UIImage) async {
         japaneseText = ""
         englishText = ""
         errorMessage = nil
         isProcessing = true
 
         do {
-            let text = try await OCRService().recognizeJapaneseText(
-                from: image
-            )
+            let text = try await OCRService().recognizeJapaneseText(from: image)
 
             japaneseText = text
 
@@ -60,9 +65,8 @@ final class MenuTranslatorModel {
     }
 
     func translate(using session: TranslationSession) async {
-        let source = japaneseText.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        )
+        isProcessing = true
+        let source = japaneseText.trim()
 
         guard !source.isEmpty else {
             return
@@ -71,8 +75,10 @@ final class MenuTranslatorModel {
         do {
             let response = try await session.translate(source)
             englishText = response.targetText
+            isProcessing = false
         } catch {
             errorMessage = error.localizedDescription
+            isProcessing = false
         }
     }
 }

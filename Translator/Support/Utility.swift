@@ -15,6 +15,9 @@ extension String {
     func trimLowercased() -> String {
         trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
+    func trim() -> String {
+        trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 }
 
 extension UIImage {
@@ -32,7 +35,7 @@ extension UIImage {
   
 }
 
-enum MenuRoute: Hashable {
+enum NavRoute: Hashable {
     case japanese
     case english
 }
