@@ -11,17 +11,18 @@ import Translation
 
 struct EnglishView: View {
     @Environment(TranslatorModel.self) private var translator
-    @State private var fontScale: Double = 1.0
-    
+
     var body: some View {
+        @Bindable var translator = translator
+        
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     Image(systemName: "textformat.size").bold()
                     
-                    Slider(value: $fontScale, in: 0.7...1.8, step: 0.05).padding(15)
+                    Slider(value: $translator.fontScale, in: 0.7...1.8, step: 0.05).padding(15)
                     
-                    Text("\(Int(fontScale * 100))%")
+                    Text("\(Int(translator.fontScale * 100))%")
                         .monospacedDigit()
                         .frame(width: 45, alignment: .trailing)
                 }
@@ -35,7 +36,7 @@ struct EnglishView: View {
                     }
                 }
                 
-                OCRImageView(fontScale: fontScale)
+                OCRImageView()
         
             }
             .padding()

@@ -22,6 +22,7 @@ final class TranslatorModel {
     var englishText = ""
     var isProcessing = false
     var errorMessage: String?
+    var fontScale: Double = 1.0
 
     // Changing this causes the translationTask modifier to receive
     // a new translation configuration.
@@ -48,17 +49,6 @@ final class TranslatorModel {
         do {
             ocrTextItems = try await ocrService.recognizeJapaneseText(from: image)
 
-//            for item in items {
-//                print(String(
-//                    format: "%.3f %.3f %.3f %.3f  %@",
-//                    item.boundingBox.minX,
-//                    item.boundingBox.minY,
-//                    item.boundingBox.width,
-//                    item.boundingBox.height,
-//                    item.text)
-//                )
-//            }
-            
             let text = ocrTextItems.reconstructedText() // see Utility Array extension
 
             japaneseText = text
@@ -88,24 +78,38 @@ final class TranslatorModel {
         }
     }
 
-    /*
-    func translateOCRItems2(using session: TranslationSession) async {
-        isProcessing = true
-        var translations: [UUID: String] = [:]
-
-        for item in ocrTextItems {
-            do {
-                let response = try await session.translate(item.text)
-                translations[item.id] = response.targetText
-            } catch {
-                translations[item.id] = item.text
+    @MainActor
+    func renderTranslatedMenu() -> UIImage {
+        
+        guard let image = selectedImage else { return UIImage() }
+        
+        let renderer = UIGraphicsImageRenderer(size: image.size)
+        
+        return renderer.image { context in
+            image.draw(in: CGRect(origin: .zero, size: image.size))
+            
+            for item in ocrTextItems {
+                guard let translation = translatedText[item.id], !translatedText.isEmpty else { continue }
+                
+                let box = CGRect(
+                    x: item.boundingBox.minX * image.size.width,
+                    y: (1 - item.boundingBox.maxY) * image.size.height,
+                    width: item.boundingBox.width * image.size.width,
+                    height: item.boundingBox.height * image.size.height
+                )
+                
+                let fontSize = max(box.height * 0.72 * fontScale, 8)
+                let font = UIFont.systemFont(ofSize: fontSize)
+                let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: UIColor.label]
+                
+                UIColor.systemBackground.withAlphaComponent(0.92).setFill()
+                
+                UIBezierPath(roundedRect: box.insetBy(dx: -4, dy: -2), cornerRadius: 3).fill()
+                
+                (translation as NSString).draw(in: box.insetBy(dx: 4, dy: 2), withAttributes: attributes)
             }
         }
-        
-        isProcessing = false
-        translatedText = translations
     }
-     */
     
     func translateOCRItems(using session: TranslationSession) async {
         isProcessing = true

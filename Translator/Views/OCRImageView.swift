@@ -10,8 +10,6 @@ import SwiftUI
 struct OCRImageView: View {
     @Environment(TranslatorModel.self) private var translator
     
-    let fontScale: Double
-    
     @State private var zoomScale: CGFloat = 1.0
     @State private var panOffset: CGSize = .zero
     @State private var gestureStartZoom: CGFloat = 1.0
@@ -36,8 +34,7 @@ struct OCRImageView: View {
                                 item: item,
                                 text: translator.translatedText[item.id] ?? item.text,
                                 imageSize: image.size,
-                                containerSize: canvasSize,
-                                fontScale: fontScale
+                                containerSize: canvasSize
                             )
                         }
                     }
@@ -111,6 +108,7 @@ struct OCRImageView: View {
             .frame(height: min(600, 800 * image.size.height / image.size.width))
         }
     }
+    
     private func constrainedOffset(_ offset: CGSize, zoomScale: CGFloat, canvasSize: CGSize, viewportSize: CGSize) -> CGSize {
         
         let scaledWidth = canvasSize.width * zoomScale
@@ -123,16 +121,17 @@ struct OCRImageView: View {
             height: min(max(offset.height, minY), 0)
         )
     }
+    
 }
 
 struct OCRTextOverlay: View {
+    @Environment(TranslatorModel.self) private var translator
     
     let item: OCRTextItem
     let text: String
     let imageSize: CGSize
     let containerSize: CGSize
-    let fontScale: Double
-    
+
     private var scale: CGFloat {
         min(containerSize.width / imageSize.width, containerSize.height / imageSize.height)
     }
@@ -165,7 +164,7 @@ struct OCRTextOverlay: View {
     }
     
     private var fontSize: CGFloat {
-        max(boxHeight * 0.72 * fontScale, 8)
+        max(boxHeight * 0.72 * translator.fontScale, 8)
     }
     
     
