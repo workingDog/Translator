@@ -5,8 +5,6 @@
 //  Created by Ringo Wathelet on 2026/10/05.
 //
 import SwiftUI
-import PhotosUI
-import Translation
 
 
 struct JapaneseView: View {

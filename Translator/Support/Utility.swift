@@ -13,6 +13,7 @@ import UIKit
 enum NavRoute: Hashable {
     case japanese
     case english
+    case store
 }
 
 enum PhotoError: LocalizedError {

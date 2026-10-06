@@ -6,12 +6,7 @@
 //
 import SwiftUI
 import SwiftData
-import UIKit
-import SwiftUI
-import Vision
 import Translation
-import PhotosUI
-
 
 
 @MainActor
@@ -141,9 +136,6 @@ final class TranslatorModel {
                 translations[item.id] = response.targetText
             }
             translatedText = translations
-            
-        //    testImage = renderTranslatedMenu()
-
         } catch {
             translatedText = Dictionary(uniqueKeysWithValues: ocrTextItems.map { ($0.id, $0.text) })
             errorMessage = error.localizedDescription

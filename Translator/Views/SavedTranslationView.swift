@@ -31,7 +31,7 @@ struct SavedTranslationView: View {
                     }
                 }
             }
-            .navigationTitle("Saved Menus")
+            .navigationTitle("Saved translations")
         }
     }
 }

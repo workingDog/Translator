@@ -7,8 +7,6 @@
 import SwiftUI
 import SwiftData
 import PhotosUI
-import Translation
-import UIKit
 
 
 struct ContentView: View {
@@ -37,6 +35,7 @@ struct ContentView: View {
                 switch route {
                     case .japanese: JapaneseView(route: $route)
                     case .english: EnglishView()
+                    case .store: SavedTranslationView()
                 }
             }
             .toolbar {
@@ -46,7 +45,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "camera").font(.title2)
                     }
-                    .buttonStyle(.borderedProminent)
+    //                .buttonStyle(.borderedProminent)
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     PhotosPicker(
@@ -56,7 +55,15 @@ struct ContentView: View {
                     ) {
                         Label("Choose Menu Photo", systemImage: "photo")
                     }
-                    .buttonStyle(.borderedProminent)
+    //                .buttonStyle(.borderedProminent)
+                }
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        route = .store
+                    } label: {
+                        Image(systemName: "list.bullet.clipboard").font(.title2)
+                    }
+     //               .buttonStyle(.borderedProminent)
                 }
             }
         }
