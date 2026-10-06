@@ -12,39 +12,75 @@ import UIKit
 import ImageIO
 
 
-struct OCRImageView: View {
-    
-    let image: UIImage
-    let items: [OCRTextItem]
-    var translatedText: [UUID: String] = [:]
 
+struct OCRImageView: View {
+    @Environment(TranslatorModel.self) private var translator
+    
     var body: some View {
-        GeometryReader { geometry in
-            let imageSize = image.size
-            let scale = min(
-                geometry.size.width / imageSize.width,
-                geometry.size.height / imageSize.height
-            )
-            let displayedWidth = imageSize.width * scale
-            let displayedHeight = imageSize.height * scale
-            let offsetX = (geometry.size.width - displayedWidth) / 2
-            let offsetY = (geometry.size.height - displayedHeight) / 2
-            ZStack {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                ForEach(items) { item in
-                    let box = item.boundingBox
-                    let x = offsetX + box.midX * displayedWidth
-                    let y = offsetY + (1 - box.midY) * displayedHeight
-                    let width = box.width * displayedWidth
-                    let height = box.height * displayedHeight
-                    Text(translatedText[item.id] ?? item.text)
-                        .font(.system(size: max(height * 0.75, 8)))
-                        .frame(width: width, height: height)
-                        .position(x: x, y: y)
+        if let image = translator.selectedImage {
+            GeometryReader { geometry in
+                ZStack {
+//                    Image(uiImage: image)
+//                        .resizable()
+//                        .scaledToFit()
+
+                    ForEach(translator.ocrTextItems) { item in
+                        OCRTextOverlay(
+                            item: item,
+                            text: translator.translatedText[item.id] ?? item.text,
+                            imageSize: image.size,
+                            containerSize: geometry.size
+                        )
+                    }
                 }
             }
+            .aspectRatio(image.size.width / image.size.height, contentMode: .fit)
         }
     }
+}
+
+// display the translated text 
+struct OCRTextOverlay: View {
+
+    let item: OCRTextItem
+    let text: String
+    let imageSize: CGSize
+    let containerSize: CGSize
+
+    var body: some View {
+        let scale = min(
+            containerSize.width / imageSize.width,
+            containerSize.height / imageSize.height
+        )
+
+        let displayedSize = CGSize(
+            width: imageSize.width * scale,
+            height: imageSize.height * scale
+        )
+
+        let offsetX = (containerSize.width - displayedSize.width) / 2
+        let offsetY = (containerSize.height - displayedSize.height) / 2
+        
+        let box = item.boundingBox
+
+        Text(text)
+            .font(.system(size: max(box.height * displayedSize.height * 0.7, 8)))
+            .foregroundStyle(.black)
+            .padding(.horizontal, 2)
+            .background(.white)
+            .position(
+                x: offsetX + box.midX * displayedSize.width,
+                y: offsetY + (1 - box.midY) * displayedSize.height
+            )
+        
+        Rectangle()
+            .stroke(.red, lineWidth: 2)
+            .frame(width: box.width * displayedSize.width, height: box.height * displayedSize.height)
+            .position(
+                x: offsetX + box.midX * displayedSize.width,
+                y: offsetY + (1 - box.midY) * displayedSize.height
+            )
+        
+    }
+
 }

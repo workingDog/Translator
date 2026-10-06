@@ -57,6 +57,11 @@ struct ContentView: View {
                 }
             }
         }
+        .task {
+            if let uimg = UIImage(named: "testmenu") {
+                selectedImages.append(ImageItem(uimage: uimg))
+            }
+        }
         .task(id: selectedPhoto) {
             await loadSelectedPhoto()
         }
@@ -73,8 +78,8 @@ struct ContentView: View {
                     Image(uiImage: imgItem.uimage)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .scaledToFill()
-                        .frame(maxHeight: .infinity)
+                        .frame(width: 444, height: 444)
+                        .scaledToFit()
                         .clipShape(RoundedRectangle(cornerRadius: 15))
                         .clipped()
                         .contentShape(Rectangle())
@@ -82,6 +87,7 @@ struct ContentView: View {
                             translator.selectedImage = imgItem.uimage
                             route = .japanese
                         }
+                        .border(.red)
                 }
             }.padding(.horizontal)
         }.padding(10)

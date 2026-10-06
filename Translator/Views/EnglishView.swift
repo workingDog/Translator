@@ -11,7 +11,7 @@ import Translation
 
 struct EnglishView: View {
     @Environment(TranslatorModel.self) private var translator
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -22,11 +22,9 @@ struct EnglishView: View {
                         Spacer()
                     }
                 }
-                Text(translator.englishText)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(.thinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                
+                OCRImageView()
+        
             }
             .padding()
         }
@@ -39,8 +37,8 @@ struct EnglishView: View {
         }
         // when translator.translationConfiguration changed, it will activate this task
         .translationTask(translator.translationConfiguration) { session in
-            print("----> EnglishView translationTask")
-            await translator.translate(using: session)
+            print("----> before EnglishView translationTask")
+            await translator.translateOCRItems(using: session)
         }
         .navigationTitle("English")
         .navigationBarTitleDisplayMode(.inline)

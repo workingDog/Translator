@@ -27,6 +27,11 @@ final class TranslatorModel {
     // a new translation configuration.
     var translationConfiguration: TranslationSession.Configuration?
 
+    var translatedText: [UUID: String] = [:]
+    
+    var ocrTextItems: [OCRTextItem] = []
+    
+    @ObservationIgnored var ocrService = OCRService()
     
     func doRecognition() async {
         if let img = selectedImage {
@@ -41,20 +46,20 @@ final class TranslatorModel {
         isProcessing = true
 
         do {
-            let items = try await OCRService().recognizeJapaneseText(from: image)
+            ocrTextItems = try await ocrService.recognizeJapaneseText(from: image)
+
+//            for item in items {
+//                print(String(
+//                    format: "%.3f %.3f %.3f %.3f  %@",
+//                    item.boundingBox.minX,
+//                    item.boundingBox.minY,
+//                    item.boundingBox.width,
+//                    item.boundingBox.height,
+//                    item.text)
+//                )
+//            }
             
-            for item in items {
-                print(String(
-                    format: "%.3f %.3f %.3f %.3f  %@",
-                    item.boundingBox.minX,
-                    item.boundingBox.minY,
-                    item.boundingBox.width,
-                    item.boundingBox.height,
-                    item.text)
-                )
-            }
-            
-            let text = items.reconstructedText() // see Utility Array extension
+            let text = ocrTextItems.reconstructedText() // see Utility Array extension
 
             japaneseText = text
 
@@ -81,5 +86,37 @@ final class TranslatorModel {
             errorMessage = error.localizedDescription
             isProcessing = false
         }
+    }
+    
+    func translateOCRItems1(using session: TranslationSession) async -> [UUID: String] {
+        isProcessing = true
+        var translations: [UUID: String] = [:]
+        for item in ocrTextItems {
+            do {
+                let response = try await session.translate(item.text)
+                translations[item.id] = response.targetText
+            } catch {
+                translations[item.id] = item.text
+            }
+        }
+        isProcessing = false
+        return translations
+    }
+    
+    func translateOCRItems(using session: TranslationSession) async {
+        isProcessing = true
+        var translations: [UUID: String] = [:]
+
+        for item in ocrTextItems {
+            do {
+                let response = try await session.translate(item.text)
+                translations[item.id] = response.targetText
+            } catch {
+                translations[item.id] = item.text
+            }
+        }
+        
+        isProcessing = false
+        translatedText = translations
     }
 }
