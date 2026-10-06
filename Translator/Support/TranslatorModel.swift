@@ -42,6 +42,18 @@ final class TranslatorModel {
 
         do {
             let items = try await OCRService().recognizeJapaneseText(from: image)
+            
+            for item in items {
+                print(String(
+                    format: "%.3f %.3f %.3f %.3f  %@",
+                    item.boundingBox.minX,
+                    item.boundingBox.minY,
+                    item.boundingBox.width,
+                    item.boundingBox.height,
+                    item.text)
+                )
+            }
+            
             let text = items.reconstructedText() // see Utility Array extension
 
             japaneseText = text
