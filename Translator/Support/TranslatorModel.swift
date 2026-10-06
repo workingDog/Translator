@@ -5,6 +5,7 @@
 //  Created by Ringo Wathelet on 2026/10/05.
 //
 import SwiftUI
+import SwiftData
 import UIKit
 import SwiftUI
 import Vision
@@ -16,6 +17,8 @@ import PhotosUI
 @MainActor
 @Observable
 final class TranslatorModel {
+
+    var testImage: UIImage?
     
     var selectedImage: UIImage?
     var japaneseText = ""
@@ -111,6 +114,21 @@ final class TranslatorModel {
         }
     }
     
+    @MainActor
+    func saveTranslatedMenu(title: String, modelContext: ModelContext) {
+        let image = renderTranslatedMenu()
+        guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
+        
+        let menu = TranslatedMenu(title: title, imageData: imageData)
+        
+        modelContext.insert(menu)
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save translated menu: \(error)")
+        }
+    }
+    
     func translateOCRItems(using session: TranslationSession) async {
         isProcessing = true
         let requests = ocrTextItems.map {
@@ -123,6 +141,9 @@ final class TranslatorModel {
                 translations[item.id] = response.targetText
             }
             translatedText = translations
+            
+        //    testImage = renderTranslatedMenu()
+
         } catch {
             translatedText = Dictionary(uniqueKeysWithValues: ocrTextItems.map { ($0.id, $0.text) })
             errorMessage = error.localizedDescription

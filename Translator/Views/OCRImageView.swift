@@ -7,6 +7,26 @@
 import SwiftUI
 
 
+/*
+struct OCRImageView: View {
+    
+    @Environment(TranslatorModel.self) private var translator
+    
+    let fontScale: Double
+    
+    var body: some View {
+        if let image = translator.selectedImage {
+            ZoomableImageView(
+                image: image,
+                items: translator.ocrTextItems,
+                translations: translator.translatedText,
+                fontScale: fontScale
+            )
+        }
+    }
+}
+*/
+
 struct OCRImageView: View {
     @Environment(TranslatorModel.self) private var translator
     

@@ -5,13 +5,15 @@
 //  Created by Ringo Wathelet on 2026/10/05.
 //
 import SwiftUI
+import SwiftData
 import PhotosUI
 import Translation
 
 
 struct EnglishView: View {
+    @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
-
+    
     var body: some View {
         @Bindable var translator = translator
         
@@ -34,12 +36,22 @@ struct EnglishView: View {
                         ProgressView()
                         Spacer()
                     }
+                } else {
+                    HStack {
+                        Spacer()
+                        Button("Save translation") {
+                            translator.saveTranslatedMenu(
+                                title: "Restaurant Menu",
+                                modelContext: modelContext
+                            )
+                        }.buttonStyle(.borderedProminent)
+                        Spacer()
+                    }
                 }
                 
                 OCRImageView()
-        
+    
             }
-            .padding()
         }
         .task {
             translator.translationConfiguration = TranslationSession.Configuration(
@@ -54,4 +66,5 @@ struct EnglishView: View {
         .navigationTitle("English")
         .navigationBarTitleDisplayMode(.inline)
     }
+    
 }

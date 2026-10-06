@@ -5,12 +5,14 @@
 //  Created by Ringo Wathelet on 2026/10/05.
 //
 import SwiftUI
+import SwiftData
 import PhotosUI
 import Translation
 import UIKit
 
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
     @State private var selectedPhoto: PhotosPickerItem?
