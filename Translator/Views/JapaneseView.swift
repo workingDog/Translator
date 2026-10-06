@@ -46,7 +46,6 @@ struct JapaneseView: View {
             }
         }
         .task {
-            print("----> JapaneseView task")
             await translator.doRecognition() 
         }
     }

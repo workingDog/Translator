@@ -11,10 +11,22 @@ import Translation
 
 struct EnglishView: View {
     @Environment(TranslatorModel.self) private var translator
-
+    @State private var fontScale: Double = 1.0
+    
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 20) {
+                HStack {
+                    Image(systemName: "textformat.size").bold()
+                    
+                    Slider(value: $fontScale, in: 0.7...1.8, step: 0.05).padding(15)
+                    
+                    Text("\(Int(fontScale * 100))%")
+                        .monospacedDigit()
+                        .frame(width: 45, alignment: .trailing)
+                }
+                .padding(.horizontal)
+                
                 if translator.isProcessing {
                     HStack {
                         Spacer()
@@ -23,13 +35,12 @@ struct EnglishView: View {
                     }
                 }
                 
-                OCRImageView()
+                OCRImageView(fontScale: fontScale)
         
             }
             .padding()
         }
         .task {
-            print("----> EnglishView task")
             translator.translationConfiguration = TranslationSession.Configuration(
                 source: Locale.Language(identifier: "ja"),
                 target: Locale.Language(identifier: "en")
@@ -37,7 +48,6 @@ struct EnglishView: View {
         }
         // when translator.translationConfiguration changed, it will activate this task
         .translationTask(translator.translationConfiguration) { session in
-            print("----> before EnglishView translationTask")
             await translator.translateOCRItems(using: session)
         }
         .navigationTitle("English")

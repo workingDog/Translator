@@ -87,23 +87,9 @@ final class TranslatorModel {
             isProcessing = false
         }
     }
-    
-    func translateOCRItems1(using session: TranslationSession) async -> [UUID: String] {
-        isProcessing = true
-        var translations: [UUID: String] = [:]
-        for item in ocrTextItems {
-            do {
-                let response = try await session.translate(item.text)
-                translations[item.id] = response.targetText
-            } catch {
-                translations[item.id] = item.text
-            }
-        }
-        isProcessing = false
-        return translations
-    }
-    
-    func translateOCRItems(using session: TranslationSession) async {
+
+    /*
+    func translateOCRItems2(using session: TranslationSession) async {
         isProcessing = true
         var translations: [UUID: String] = [:]
 
@@ -118,5 +104,25 @@ final class TranslatorModel {
         
         isProcessing = false
         translatedText = translations
+    }
+     */
+    
+    func translateOCRItems(using session: TranslationSession) async {
+        isProcessing = true
+        let requests = ocrTextItems.map {
+            TranslationSession.Request(sourceText: $0.text)
+        }
+        do {
+            let responses = try await session.translations(from: requests)
+            var translations: [UUID: String] = [:]
+            for (item, response) in zip(ocrTextItems, responses) {
+                translations[item.id] = response.targetText
+            }
+            translatedText = translations
+        } catch {
+            translatedText = Dictionary(uniqueKeysWithValues: ocrTextItems.map { ($0.id, $0.text) })
+            errorMessage = error.localizedDescription
+        }
+        isProcessing = false
     }
 }
