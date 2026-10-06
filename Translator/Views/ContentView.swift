@@ -30,6 +30,7 @@ struct ContentView: View {
             }
             .padding()
             .navigationTitle("Translator")
+            .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(item: $route) { route in
                 switch route {
                     case .japanese: JapaneseView(route: $route)
@@ -37,7 +38,7 @@ struct ContentView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .automatic) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showCamera = true
                     } label: {
@@ -45,7 +46,7 @@ struct ContentView: View {
                     }
                     .buttonStyle(.borderedProminent)
                 }
-                ToolbarItem(placement: .automatic) {
+                ToolbarItem(placement: .topBarLeading) {
                     PhotosPicker(
                         selection: $selectedPhoto,
                         matching: .images,
@@ -57,8 +58,9 @@ struct ContentView: View {
                 }
             }
         }
+        // for testing
         .task {
-            if let uimg = UIImage(named: "testmenu") {
+            if let uimg = UIImage(named: "testmenu2") {
                 selectedImages.append(ImageItem(uimage: uimg))
             }
         }
@@ -87,7 +89,7 @@ struct ContentView: View {
                             translator.selectedImage = imgItem.uimage
                             route = .japanese
                         }
-                        .border(.red)
+                        .border(.black, width: 2)
                 }
             }.padding(.horizontal)
         }.padding(10)

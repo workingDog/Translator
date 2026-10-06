@@ -12,31 +12,121 @@ struct OCRImageView: View {
     
     let fontScale: Double
     
+    @State private var zoomScale: CGFloat = 1.0
+    @State private var panOffset: CGSize = .zero
+    @State private var gestureStartZoom: CGFloat = 1.0
+    @State private var gestureStartOffset: CGSize = .zero
+    @State private var gestureStartAnchor: CGPoint = .zero
+    @State private var isPinching = false
+    
     var body: some View {
         if let image = translator.selectedImage {
             GeometryReader { geometry in
+                let baseWidth: CGFloat = 800
+                let baseHeight = baseWidth * image.size.height / image.size.width
+                let canvasSize = CGSize(width: baseWidth, height: baseHeight)
+                
                 ZStack {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFit()
-
-                    ForEach(translator.ocrTextItems) { item in
-                        OCRTextOverlay(
-                            item: item,
-                            text: translator.translatedText[item.id] ?? item.text,
-                            imageSize: image.size,
-                            containerSize: geometry.size,
-                            fontScale: fontScale
-                        )
+                    ZStack {
+                        Image(uiImage: image)
+                            .resizable()
+                            .frame(width: canvasSize.width, height: canvasSize.height)
+                        ForEach(translator.ocrTextItems) { item in
+                            OCRTextOverlay(
+                                item: item,
+                                text: translator.translatedText[item.id] ?? item.text,
+                                imageSize: image.size,
+                                containerSize: canvasSize,
+                                fontScale: fontScale
+                            )
+                        }
+                    }
+                    .frame(width: canvasSize.width, height: canvasSize.height)
+                    .scaleEffect(zoomScale, anchor: .topLeading)
+                    .offset(panOffset)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            guard !isPinching else { return }
+                            panOffset = constrainedOffset(
+                                CGSize(
+                                    width: gestureStartOffset.width + value.translation.width,
+                                    height: gestureStartOffset.height + value.translation.height
+                                ),
+                                zoomScale: zoomScale,
+                                canvasSize: canvasSize,
+                                viewportSize: geometry.size
+                            )
+                        }
+                        .onEnded { _ in
+                            gestureStartOffset = panOffset
+                        }
+                )
+                .simultaneousGesture(
+                    MagnifyGesture()
+                        .onChanged { value in
+                            if !isPinching {
+                                isPinching = true
+                                gestureStartZoom = zoomScale
+                                gestureStartOffset = panOffset
+                                gestureStartAnchor = CGPoint(
+                                    x: value.startAnchor.x * geometry.size.width,
+                                    y: value.startAnchor.y * geometry.size.height
+                                )
+                            }
+                            let newZoom = min(max(gestureStartZoom * value.magnification, 1.0), 4.0)
+                            let contentX = (gestureStartAnchor.x - gestureStartOffset.width) / gestureStartZoom
+                            let contentY = (gestureStartAnchor.y - gestureStartOffset.height) / gestureStartZoom
+                            let newOffset = CGSize(
+                                width: gestureStartAnchor.x - contentX * newZoom,
+                                height: gestureStartAnchor.y - contentY * newZoom
+                            )
+                            zoomScale = newZoom
+                            panOffset = constrainedOffset(
+                                newOffset,
+                                zoomScale: newZoom,
+                                canvasSize: canvasSize,
+                                viewportSize: geometry.size
+                            )
+                        }
+                        .onEnded { _ in
+                            isPinching = false
+                            gestureStartZoom = zoomScale
+                            gestureStartOffset = panOffset
+                        }
+                )
+                .onTapGesture(count: 2) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        zoomScale = 1.0
+                        panOffset = .zero
+                        gestureStartZoom = 1.0
+                        gestureStartOffset = .zero
                     }
                 }
             }
-            .aspectRatio(image.size.width / image.size.height, contentMode: .fit)
+            .frame(height: min(600, 800 * image.size.height / image.size.width))
         }
+    }
+    private func constrainedOffset(_ offset: CGSize, zoomScale: CGFloat, canvasSize: CGSize, viewportSize: CGSize) -> CGSize {
+        
+        let scaledWidth = canvasSize.width * zoomScale
+        let scaledHeight = canvasSize.height * zoomScale
+        let minX = min(0, viewportSize.width - scaledWidth)
+        let minY = min(0, viewportSize.height - scaledHeight)
+        
+        return CGSize(
+            width: min(max(offset.width, minX), 0),
+            height: min(max(offset.height, minY), 0)
+        )
     }
 }
 
 struct OCRTextOverlay: View {
+    
     let item: OCRTextItem
     let text: String
     let imageSize: CGSize
@@ -93,131 +183,3 @@ struct OCRTextOverlay: View {
             .position(x: x, y: y)
     }
 }
-
-
-
-/*
-
-struct OCRTextOverlay1: View {
-    let item: OCRTextItem
-    let text: String
-    let imageSize: CGSize
-    let containerSize: CGSize
-    let fontSize: Double
-    
-    var body: some View {
-        OCRTextOverlayContent(
-            item: item,
-            text: text,
-            imageSize: imageSize,
-            containerSize: containerSize,
-            fontSize: fontSize
-        )
-    }
-}
-
-struct OCRTextOverlayContent: View {
-    
-    let item: OCRTextItem
-    let text: String
-    let imageSize: CGSize
-    let containerSize: CGSize
-    let fontSize: Double
-    
-    private var geometry: OCROverlayGeometry {
-        OCROverlayGeometry(item: item, imageSize: imageSize, fontSize: fontSize)
-    }
-    
-    var body: some View {
-        Text(text)
-            .font(.system(size: geometry.fontSize, weight: .regular))
-            .lineLimit(1)
-            .minimumScaleFactor(0.45)
-            .foregroundStyle(.primary)
-            .frame(width: geometry.width, height: geometry.height)
-            .background {
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(.background.opacity(0.92))
-            }
-            .position(x: geometry.x, y: geometry.y)
-    }
-}
-struct OCROverlayGeometry {
-    
-    let x: CGFloat
-    let y: CGFloat
-    let width: CGFloat
-    let height: CGFloat
-    let fontSize: CGFloat
-    
-    init(item: OCRTextItem, imageSize: CGSize, containerSize: CGSize) {
-        let scale = min(containerSize.width / imageSize.width, containerSize.height / imageSize.height)
-        let displayedSize = CGSize(width: imageSize.width * scale, height: imageSize.height * scale)
-        
-        let offsetX = (containerSize.width - displayedSize.width) / 2
-        let offsetY = (containerSize.height - displayedSize.height) / 2
-        let box = item.boundingBox
-        
-        let originalWidth = box.width * displayedSize.width
-        let originalHeight = box.height * displayedSize.height
-        
-        width = originalWidth + 8
-        height = originalHeight + 4
-        x = offsetX + box.midX * displayedSize.width
-        y = offsetY + (1 - box.midY) * displayedSize.height
-        fontSize = max(originalHeight * 0.72, 8)
-    }
-    
-}
-
-
-
-
-// display the translated text
-struct OCRTextOverlay1: View {
-
-    let item: OCRTextItem
-    let text: String
-    let imageSize: CGSize
-    let containerSize: CGSize
-
-    var body: some View {
-        let scale = min(
-            containerSize.width / imageSize.width,
-            containerSize.height / imageSize.height
-        )
-
-        let displayedSize = CGSize(
-            width: imageSize.width * scale,
-            height: imageSize.height * scale
-        )
-
-        let offsetX = (containerSize.width - displayedSize.width) / 2
-        let offsetY = (containerSize.height - displayedSize.height) / 2
-        
-        let box = item.boundingBox
-
-        Text(text)
-            .font(.system(size: max(box.height * displayedSize.height * 0.7, 8)))
-            .foregroundStyle(.black)
-            .padding(.horizontal, 2)
-            .background(.white)
-            .position(
-                x: offsetX + box.midX * displayedSize.width,
-                y: offsetY + (1 - box.midY) * displayedSize.height
-            )
-        
-        Rectangle()
-            .stroke(.red, lineWidth: 2)
-            .frame(width: box.width * displayedSize.width, height: box.height * displayedSize.height)
-            .position(
-                x: offsetX + box.midX * displayedSize.width,
-                y: offsetY + (1 - box.midY) * displayedSize.height
-            )
-        
-    }
-
-}
-
-
-*/
