@@ -12,7 +12,7 @@ import Translation
 @MainActor
 @Observable
 final class TranslatorModel {
-
+    
     var testImage: UIImage?
     
     var selectedImage: UIImage?
@@ -21,11 +21,11 @@ final class TranslatorModel {
     var isProcessing = false
     var errorMessage: String?
     var fontScale: Double = 1.0
-
+    
     // Changing this causes the translationTask modifier to receive
     // a new translation configuration.
     var translationConfiguration: TranslationSession.Configuration?
-
+    
     var translatedText: [UUID: String] = [:]
     
     var ocrTextItems: [OCRTextItem] = []
@@ -43,14 +43,14 @@ final class TranslatorModel {
         englishText = ""
         errorMessage = nil
         isProcessing = true
-
+        
         do {
             ocrTextItems = try await ocrService.recognizeJapaneseText(from: image)
-
+            
             let text = ocrTextItems.reconstructedText() // see Utility Array extension
-
+            
             japaneseText = text
-
+            
             guard !text.trim().isEmpty else {
                 errorMessage = "No Japanese text was recognized."
                 isProcessing = false
@@ -61,7 +61,7 @@ final class TranslatorModel {
         }
         isProcessing = false
     }
-
+    
     func translate(using session: TranslationSession) async {
         isProcessing = true
         let source = japaneseText.trim()
@@ -75,7 +75,7 @@ final class TranslatorModel {
             isProcessing = false
         }
     }
-
+    
     @MainActor
     func renderTranslatedMenu() -> UIImage {
         
@@ -87,7 +87,7 @@ final class TranslatorModel {
             image.draw(in: CGRect(origin: .zero, size: image.size))
             
             for item in ocrTextItems {
-                guard let translation = translatedText[item.id], !translatedText.isEmpty else { continue }
+                guard let translation = translatedText[item.id], !translation.isEmpty else { continue }
                 
                 let box = CGRect(
                     x: item.boundingBox.minX * image.size.width,
@@ -111,12 +111,20 @@ final class TranslatorModel {
     
     @MainActor
     func saveTranslatedMenu(title: String, modelContext: ModelContext) {
-        let image = renderTranslatedMenu()
-        guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
+        guard let image = selectedImage,
+              let imageData = image.jpegData(compressionQuality: 0.9) else { return }
         
-        let menu = TranslatedMenu(title: title, imageData: imageData)
+        let savedOCRData = SavedOCRData(
+            items: ocrTextItems,
+            translations: translatedText
+        )
+        
+        guard let ocrData = try? JSONEncoder().encode(savedOCRData) else { return }
+        
+        let menu = TranslatedMenu(title: title, imageData: imageData, ocrData: ocrData)
         
         modelContext.insert(menu)
+        
         do {
             try modelContext.save()
         } catch {

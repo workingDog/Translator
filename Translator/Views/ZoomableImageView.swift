@@ -8,6 +8,7 @@ import SwiftUI
 
 
 struct ZoomableImageView: View {
+    @Environment(TranslatorModel.self) private var translator
     
     let image: UIImage
     let items: [OCRTextItem]

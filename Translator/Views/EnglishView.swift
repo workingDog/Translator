@@ -62,7 +62,8 @@ struct EnglishView: View {
         .task {
             translator.translationConfiguration = TranslationSession.Configuration(
                 source: Locale.Language(identifier: "ja"),
-                target: Locale.Language(identifier: "en")
+                target: Locale.Language(identifier: "en"),
+                preferredStrategy: .highFidelity
             )
         }
         // when translator.translationConfiguration changed, it will activate this task
