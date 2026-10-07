@@ -83,8 +83,8 @@ struct ContentView: View {
     
     @ViewBuilder
     var selectedImagesView: some View {
-        ScrollView(.horizontal) {
-            HStack {
+        ScrollView {
+            VStack {
                 ForEach(selectedImages) { imgItem in
                     Image(uiImage: imgItem.uimage)
                         .resizable()

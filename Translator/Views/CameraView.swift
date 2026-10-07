@@ -51,9 +51,8 @@ class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerContro
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        
         guard let selectedImage = info[.originalImage] as? UIImage else { return }
-        self.selectedImages = [ImageItem(uimage: selectedImage)]
+        self.selectedImages.append(ImageItem(uimage: selectedImage))
         self.dismiss()
     }
     
