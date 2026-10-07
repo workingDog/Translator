@@ -35,9 +35,9 @@ struct ContentView: View {
                 .navigationTitle("Translator")
                 .navigationDestination(item: $route) { route in
                     switch route {
-                    case .japanese: JapaneseView(route: $route)
-                    case .english: EnglishView()
-                    case .store: SavedTranslationView()
+                        case .japanese: JapaneseView(route: $route)
+                        case .english: EnglishView()
+                        case .store: SavedTranslationView()
                     }
                 }
                 .toolbar {
@@ -83,25 +83,31 @@ struct ContentView: View {
     
     @ViewBuilder
     var selectedImagesView: some View {
-        ScrollView {
-            VStack {
-                ForEach(selectedImages) { imgItem in
-                    Image(uiImage: imgItem.uimage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 444, height: 444)
-                        .scaledToFit()
-                        .clipShape(RoundedRectangle(cornerRadius: 15))
-                        .clipped()
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            translator.selectedImage = imgItem.uimage
-                            route = .japanese
-                        }
-                        .border(.black, width: 2)
-                }
-            }.padding(.horizontal)
-        }.padding(10)
+        List {
+            ForEach(selectedImages) { imgItem in
+                Image(uiImage: imgItem.uimage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 333, height: 333)
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                    .clipped()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        translator.selectedImage = imgItem.uimage
+                        route = .japanese
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 1, bottom: 4, trailing: 1))
+            }
+            .onDelete(perform: deleteImage)
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+    }
+    
+    private func deleteImage(at offsets: IndexSet) {
+        selectedImages.remove(atOffsets: offsets)
     }
     
     private var photoPicker: some View {
