@@ -58,7 +58,7 @@ struct ContentView: View {
                     Button {
                         route = .store
                     } label: {
-                        Image(systemName: "list.bullet.clipboard").font(.title2)
+                        Image(systemName: "richtext.page").font(.title2)
                     }
                 }
             }

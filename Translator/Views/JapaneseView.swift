@@ -16,11 +16,11 @@ struct JapaneseView: View {
         @Bindable var translator = translator
         
         VStack(alignment: .leading, spacing: 16) {
-            Text("Japanese OCR")
+            Text("Japanese text")
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            Text("Correct any OCR mistakes before translating.")
+            Text("Correct any text before translating")
 
             TextEditor(text: $translator.japaneseText)
                 .frame(minHeight: 250)

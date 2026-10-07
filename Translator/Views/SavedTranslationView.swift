@@ -37,9 +37,14 @@ struct SavedTranslationView: View {
 }
 
 struct SavedMenuView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) var dismiss
+    
     let menu: TranslatedMenu
     
     @State private var showEditSheet = false
+    @State private var shouldDelete = false
+    
     
     var body: some View {
         if let image = UIImage(data: menu.imageData) {
@@ -60,11 +65,29 @@ struct SavedMenuView: View {
                 
                 Spacer()
             }
-            .alert("Rename Playlist", isPresented: $showEditSheet) {
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        shouldDelete = true
+                    } label: {
+                        Image(systemName: "trash").font(.title2)
+                    }
+                }
+            }
+            .alert("Rename translation", isPresented: $showEditSheet) {
                 @Bindable var menu = menu
                 TextField("Title", text: $menu.title)
                 Button("OK") { }
             }
+            .alert("Delete this translation?", isPresented: $shouldDelete) {
+                Button("Delete", role: .destructive) {
+                    modelContext.delete(menu)
+                    try? modelContext.save()
+                    dismiss()
+                }
+                Button("Cancel", role: .cancel) { }
+            }
         }
     }
+    
 }
