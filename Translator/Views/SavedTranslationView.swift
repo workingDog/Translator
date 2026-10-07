@@ -38,12 +38,33 @@ struct SavedTranslationView: View {
 
 struct SavedMenuView: View {
     let menu: TranslatedMenu
-
+    
+    @State private var showEditSheet = false
+    
     var body: some View {
         if let image = UIImage(data: menu.imageData) {
-            ZoomableImageView(image: image)
-                .navigationTitle(menu.title)
-                .navigationBarTitleDisplayMode(.inline)
+            VStack(spacing: 10) {
+                Button {
+                    showEditSheet = true
+                } label: {
+                    Text(menu.title)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .lineLimit(2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                .padding(10)
+                
+                ZoomableImageView(image: image, items: [], translations: [:])
+                
+                Spacer()
+            }
+            .alert("Rename Playlist", isPresented: $showEditSheet) {
+                @Bindable var menu = menu
+                TextField("Title", text: $menu.title)
+                Button("OK") { }
+            }
         }
     }
 }

@@ -30,7 +30,6 @@ struct ContentView: View {
             }
             .padding()
             .navigationTitle("Translator")
-            .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(item: $route) { route in
                 switch route {
                     case .japanese: JapaneseView(route: $route)
@@ -45,7 +44,6 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "camera").font(.title2)
                     }
-    //                .buttonStyle(.borderedProminent)
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     PhotosPicker(
@@ -55,15 +53,13 @@ struct ContentView: View {
                     ) {
                         Label("Choose Menu Photo", systemImage: "photo")
                     }
-    //                .buttonStyle(.borderedProminent)
                 }
-                ToolbarItem(placement: .automatic) {
+                ToolbarItem(placement: .principal) {
                     Button {
                         route = .store
                     } label: {
                         Image(systemName: "list.bullet.clipboard").font(.title2)
                     }
-     //               .buttonStyle(.borderedProminent)
                 }
             }
         }

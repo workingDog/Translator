@@ -13,6 +13,8 @@ struct EnglishView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
+    @State private var isSaved = false
+    
     var body: some View {
         @Bindable var translator = translator
         
@@ -38,12 +40,17 @@ struct EnglishView: View {
                 } else {
                     HStack {
                         Spacer()
-                        Button("Save translation") {
-                            translator.saveTranslatedMenu(
-                                title: "Restaurant Menu",
-                                modelContext: modelContext
-                            )
-                        }.buttonStyle(.borderedProminent)
+                        Button(isSaved ? "Translation saved" : "Save translation") {
+                            if !isSaved {
+                                translator.saveTranslatedMenu(
+                                    title: "Restaurant Menu",
+                                    modelContext: modelContext
+                                )
+                                isSaved = true
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(isSaved)
                         Spacer()
                     }
                 }
