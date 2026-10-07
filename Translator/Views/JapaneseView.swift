@@ -15,32 +15,36 @@ struct JapaneseView: View {
     var body: some View {
         @Bindable var translator = translator
         
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Japanese text")
-                .font(.title2)
-                .fontWeight(.semibold)
-
-            Text("Correct any text before translating")
-
-            TextEditor(text: $translator.japaneseText)
-                .frame(minHeight: 250)
-                .padding(8)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 10).stroke(.quaternary)
+        ZStack {
+            AppBackground().ignoresSafeArea()
+            
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Japanese text")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                
+                Text("Correct any text before translating")
+                
+                TextEditor(text: $translator.japaneseText)
+                    .frame(minHeight: 250)
+                    .padding(8)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10).stroke(.quaternary)
+                    }
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Japanese")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        route = .english
+                    } label: {
+                        Image(systemName: "translate").font(.title2)
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
-            Spacer()
-        }
-        .padding()
-        .navigationTitle("Japanese")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    route = .english
-                } label: {
-                    Image(systemName: "translate").font(.title2)
-                }
-                .buttonStyle(.borderedProminent)
             }
         }
         .task {

@@ -22,43 +22,47 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                selectedImagesView
-                if let errorMessage = translator.errorMessage {
-                    Text(errorMessage).foregroundStyle(.red)
+            ZStack {
+                AppBackground().ignoresSafeArea()
+                
+                VStack(spacing: 20) {
+                    selectedImagesView
+                    if let errorMessage = translator.errorMessage {
+                        Text(errorMessage).foregroundStyle(.red)
+                    }
                 }
-            }
-            .padding()
-            .navigationTitle("Translator")
-            .navigationDestination(item: $route) { route in
-                switch route {
+                .padding()
+                .navigationTitle("Translator")
+                .navigationDestination(item: $route) { route in
+                    switch route {
                     case .japanese: JapaneseView(route: $route)
                     case .english: EnglishView()
                     case .store: SavedTranslationView()
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showCamera = true
-                    } label: {
-                        Image(systemName: "camera").font(.title2)
                     }
                 }
-                ToolbarItem(placement: .topBarLeading) {
-                    PhotosPicker(
-                        selection: $selectedPhoto,
-                        matching: .images,
-                        photoLibrary: .shared()
-                    ) {
-                        Label("Choose Menu Photo", systemImage: "photo")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showCamera = true
+                        } label: {
+                            Image(systemName: "camera").font(.title2)
+                        }
                     }
-                }
-                ToolbarItem(placement: .principal) {
-                    Button {
-                        route = .store
-                    } label: {
-                        Image(systemName: "richtext.page").font(.title2)
+                    ToolbarItem(placement: .topBarLeading) {
+                        PhotosPicker(
+                            selection: $selectedPhoto,
+                            matching: .images,
+                            photoLibrary: .shared()
+                        ) {
+                            Label("Choose Menu Photo", systemImage: "photo")
+                        }
+                    }
+                    ToolbarItem(placement: .principal) {
+                        Button {
+                            route = .store
+                        } label: {
+                            Image(systemName: "richtext.page").font(.title2)
+                        }
                     }
                 }
             }
