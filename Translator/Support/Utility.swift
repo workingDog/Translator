@@ -7,19 +7,6 @@
 import SwiftUI
 
 
-enum NavRoute: Hashable {
-    case japanese
-    case english
-    case store
-}
-
-enum PhotoError: LocalizedError {
-    case invalidData
-    
-    var errorDescription: String? {
-        "The selected photo could not be loaded."
-    }
-}
 
 struct ImageItem: Identifiable, Hashable {
     let id = UUID()

@@ -9,13 +9,29 @@ import SwiftData
 import PhotosUI
 
 
+enum PhotoError: LocalizedError {
+    case invalidData
+    
+    var errorDescription: String? {
+        "The selected photo could not be loaded."
+    }
+}
+
+enum NavRoute: Hashable {
+    case japanese
+    case english
+    case store
+    case smart
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
     @State private var selectedPhoto: PhotosPickerItem?
-    @State private var route: NavRoute?
+    @State private var route: NavRoute? = .smart
     @State private var showCamera = false
+    @State private var showSmart = false
     @State private var cameraCancel = false
     @State private var selectedImages: [ImageItem] = []
 
@@ -38,6 +54,7 @@ struct ContentView: View {
                         case .japanese: JapaneseView(route: $route)
                         case .english: EnglishView()
                         case .store: SavedTranslationView()
+                        case .smart: AiTranslationView()
                     }
                 }
                 .toolbar {
@@ -46,6 +63,13 @@ struct ContentView: View {
                             showCamera = true
                         } label: {
                             Image(systemName: "camera").font(.title2)
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            route = .smart
+                        } label: {
+                            Image(systemName: "wand.and.sparkles").font(.title2)
                         }
                     }
                     ToolbarItem(placement: .topBarLeading) {
@@ -69,8 +93,9 @@ struct ContentView: View {
         }
         // for testing
         .task {
-            if let uimg = UIImage(named: "testmenu2") {
+            if let uimg = UIImage(named: "testmenu") {
                 selectedImages.append(ImageItem(uimage: uimg))
+                translator.selectedImage = uimg
             }
         }
         .task(id: selectedPhoto) {
