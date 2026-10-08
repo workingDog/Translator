@@ -23,24 +23,28 @@ struct TranslationView: View {
     @State private var mode: TransMode?
     @State private var isSaved = false
     
+    @State private var modelTest = ""
+    
     var body: some View {
         ZStack {
             AppBackground().ignoresSafeArea()
             
-            VStack(alignment: .leading, spacing: 20) {
-                
+            VStack(alignment: .leading, spacing: 12) {
+     
                 HStack {
                     Spacer()
+                    
                     Picker("", selection: $mode) {
-                        Text("None").tag(nil as TransMode?)
                         Text("OCR").tag(TransMode.ocr)
                         Text("AI").tag(TransMode.ai)
                     }
                     .pickerStyle(.segmented)
-                    .frame(width: 150)
+                    .font(.system(size: 30, weight: .semibold))
+                    .frame(width: 180)
                     .padding(20)
+                    
                     Spacer()
-                }
+                }.padding(20)
                 
                 Spacer()
                 
@@ -53,6 +57,7 @@ struct TranslationView: View {
                 }
                 
             } // VStack
+            .padding(10)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -70,3 +75,26 @@ struct TranslationView: View {
     }
 
 }
+
+
+
+
+
+
+//                Button("Test Foundation Model") {
+//                    Task {
+//                        let model = SystemLanguageModel.default
+//                        print("Before request: \(model.availability)")
+//                        guard case .available = model.availability else {
+//                            modelTest = "Model unavailable: \(model.availability)"
+//                            return
+//                        }
+//                        do {
+//                            let session = LanguageModelSession()
+//                            let response = try await session.respond(to: "Reply with exactly: Model works")
+//                            modelTest = response.content
+//                        } catch {
+//                            modelTest = "Error: \(error.localizedDescription)"
+//                        }
+//                    }
+//                }.buttonStyle(.borderedProminent)

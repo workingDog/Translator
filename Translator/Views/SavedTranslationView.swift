@@ -53,6 +53,7 @@ struct SavedTranslationView: View {
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .navigationTitle("Saved translations")
+                .navigationBarTitleDisplayMode(.inline)
             }
         }
     }

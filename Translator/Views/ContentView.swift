@@ -43,8 +43,10 @@ struct ContentView: View {
             ZStack {
                 AppBackground().ignoresSafeArea()
                 
-                VStack(spacing: 20) {
+                VStack(spacing: 12) {
+                    
                     selectedImagesView
+                    
                     if let errorMessage = translator.errorMessage {
                         Text(errorMessage).foregroundStyle(.red)
                     }
