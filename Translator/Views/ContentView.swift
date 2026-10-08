@@ -22,6 +22,7 @@ enum NavRoute: Hashable {
     case english
     case store
     case smart
+    case translation
 }
 
 struct ContentView: View {
@@ -29,11 +30,12 @@ struct ContentView: View {
     @Environment(TranslatorModel.self) private var translator
     
     @State private var selectedPhoto: PhotosPickerItem?
-    @State private var route: NavRoute? = .smart
+    @State private var route: NavRoute?
+    @State private var selectedImages: [ImageItem] = []
+    
     @State private var showCamera = false
     @State private var showSmart = false
     @State private var cameraCancel = false
-    @State private var selectedImages: [ImageItem] = []
 
     
     var body: some View {
@@ -50,11 +52,11 @@ struct ContentView: View {
                 .padding()
                 .navigationTitle("Translator")
                 .navigationDestination(item: $route) { route in
-                    switch route {
-                        case .japanese: JapaneseView(route: $route)
-                        case .english: EnglishView()
-                        case .store: SavedTranslationView()
-                        case .smart: AiTranslationView()
+                    if route == .store {
+                        SavedTranslationView()
+                    }
+                    if route == .translation {
+                        TranslationView()
                     }
                 }
                 .toolbar {
@@ -63,13 +65,6 @@ struct ContentView: View {
                             showCamera = true
                         } label: {
                             Image(systemName: "camera").font(.title2)
-                        }
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            route = .smart
-                        } label: {
-                            Image(systemName: "wand.and.sparkles").font(.title2)
                         }
                     }
                     ToolbarItem(placement: .topBarLeading) {
@@ -120,7 +115,7 @@ struct ContentView: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         translator.selectedImage = imgItem.uimage
-                        route = .japanese
+                        route = .translation
                     }
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets(top: 4, leading: 1, bottom: 4, trailing: 1))

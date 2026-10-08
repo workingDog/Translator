@@ -11,7 +11,6 @@ import SwiftData
 struct SavedTranslationView: View {
     
     @Query(sort: \TranslatedMenu.createdAt, order: .reverse)
-    
     private var menus: [TranslatedMenu]
     
     var body: some View {

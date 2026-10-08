@@ -13,13 +13,12 @@ struct EnglishView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
-    @State private var isSaved = false
     
     var body: some View {
         @Bindable var translator = translator
         
         ZStack {
-            AppBackground().ignoresSafeArea()
+            Color.clear.ignoresSafeArea()
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
@@ -40,22 +39,6 @@ struct EnglishView: View {
                             ProgressView()
                             Spacer()
                         }
-                    } else {
-                        HStack {
-                            Spacer()
-                            Button(isSaved ? "Translation saved" : "Save translation") {
-                                if !isSaved {
-                                    translator.saveTranslatedMenu(
-                                        title: "Restaurant Menu",
-                                        modelContext: modelContext
-                                    )
-                                    isSaved = true
-                                }
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(isSaved)
-                            Spacer()
-                        }
                     }
                     
                     OCRImageView()
@@ -64,6 +47,9 @@ struct EnglishView: View {
             }
         }
         .task {
+            // do OCR
+            await translator.doRecognition()
+            // do translation
             translator.translationConfiguration = TranslationSession.Configuration(
                 source: Locale.Language(identifier: "ja"),
                 target: Locale.Language(identifier: "en"),
@@ -74,8 +60,6 @@ struct EnglishView: View {
         .translationTask(translator.translationConfiguration) { session in
             await translator.translateOCRItems(using: session)
         }
-        .navigationTitle("English")
-        .navigationBarTitleDisplayMode(.inline)
     }
     
 }

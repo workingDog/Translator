@@ -5,46 +5,68 @@
 //  Created by Ringo Wathelet on 2026/10/05.
 //
 import SwiftUI
+import SwiftData
 import Translation
+import FoundationModels
+import Vision
 
+
+enum TransMode: String, CaseIterable {
+    case ocr
+    case ai
+}
 
 struct TranslationView: View {
-    let japaneseText: String
-
-    @State private var englishText = ""
-    @State private var configuration: TranslationSession.Configuration?
-
+    @Environment(\.modelContext) private var modelContext
+    @Environment(TranslatorModel.self) private var translator
+    
+    @State private var mode: TransMode?
+    @State private var isSaved = false
+    
     var body: some View {
         ZStack {
             AppBackground().ignoresSafeArea()
             
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Japanese").font(.headline)
+            VStack(alignment: .leading, spacing: 20) {
                 
-                Text(japaneseText)
-                
-                Button("Translate") {
-                    configuration = TranslationSession.Configuration(
-                        source: Locale.Language(identifier: "ja"),
-                        target: Locale.Language(identifier: "en")
-                    )
+                HStack {
+                    Spacer()
+                    Picker("", selection: $mode) {
+                        Text("None").tag(nil as TransMode?)
+                        Text("OCR").tag(TransMode.ocr)
+                        Text("AI").tag(TransMode.ai)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 150)
+                    .padding(20)
+                    Spacer()
                 }
                 
-                if !englishText.isEmpty {
-                    Divider()
-                    Text("English").font(.headline)
-                    Text(englishText)
+                Spacer()
+                
+                if mode == .ocr {
+                    EnglishView()
                 }
-            }
-            .padding()
+                
+                if mode == .ai {
+                    AiTranslationView()
+                }
+                
+            } // VStack
         }
-        .translationTask(configuration) { session in
-            do {
-                let response = try await session.translate(japaneseText)
-                englishText = response.targetText
-            } catch {
-                englishText = "Translation failed: \(error.localizedDescription)"
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Save") {
+                    if !isSaved {
+                        translator.saveTranslatedMenu(
+                            title: "Restaurant Menu",
+                            modelContext: modelContext)
+                        isSaved = true
+                    }
+                }
+                .disabled(isSaved)
             }
         }
     }
+
 }

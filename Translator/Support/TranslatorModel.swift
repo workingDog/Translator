@@ -23,6 +23,7 @@ final class TranslatorModel {
     var translationConfiguration: TranslationSession.Configuration?
     var translatedText: [UUID: String] = [:]
     var ocrTextItems: [OCRTextItem] = []
+    var menuTranslation: MenuTranslation?
     
     @ObservationIgnored var ocrService = OCRService()
     
@@ -94,28 +95,6 @@ final class TranslatorModel {
         }
     }
     
-    @MainActor
-    func saveTranslatedMenu(title: String, modelContext: ModelContext) {
-        guard let image = selectedImage,
-              let imageData = image.jpegData(compressionQuality: 0.9) else { return }
-        
-        let savedOCRData = SavedOCRData(
-            items: ocrTextItems,
-            translations: translatedText
-        )
-        
-        guard let ocrData = try? JSONEncoder().encode(savedOCRData) else { return }
-        
-        let savedMenu = TranslatedMenu(title: title, imageData: imageData, ocrData: ocrData)
-        
-        modelContext.insert(savedMenu)
-        do {
-            try modelContext.save()
-        } catch {
-            print("Failed to save translated menu: \(error)")
-        }
-    }
-    
     func translateOCRItems(using session: TranslationSession) async {
         isProcessing = true
         let requests = ocrTextItems.map {
@@ -135,8 +114,38 @@ final class TranslatorModel {
         isProcessing = false
     }
     
+    @MainActor
+    func saveTranslatedMenu(title: String, modelContext: ModelContext) {
+        guard let image = selectedImage,
+              let imageData = image.jpegData(compressionQuality: 0.9) else { return }
+        
+        let savedOCRData = SavedOCRData(
+            items: ocrTextItems,
+            translations: translatedText
+        )
+        
+        guard let ocrData = try? JSONEncoder().encode(savedOCRData) else { return }
+        let aiData = menuTranslation.flatMap { try? JSONEncoder().encode($0) }
+        
+        let savedMenu = TranslatedMenu(
+            title: title,
+            imageData: imageData,
+            ocrData: ocrData,
+            aiData: aiData
+        )
+        
+        modelContext.insert(savedMenu)
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save translated menu: \(error)")
+        }
+    }
+    
     func makeTranslations(from menu: MenuTranslation, ocrItems: [OCRTextItem]) -> [UUID: String] {
+        menuTranslation = menu
         var translations: [UUID: String] = [:]
+        
         for section in menu.sections {
             for menuItem in section.items {
                 if let ocrItem = ocrItems.first(where: { $0.text == menuItem.japanese }) {
@@ -146,4 +155,5 @@ final class TranslatorModel {
         }
         return translations
     }
+
 }

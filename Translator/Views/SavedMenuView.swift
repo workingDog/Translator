@@ -50,13 +50,28 @@ struct SavedMenuView: View {
                             .frame(width: 45, alignment: .trailing)
                     }
                     .padding(.horizontal)
-                    
+
                     ZoomableImageView(
                         image: image,
                         items: savedOCRData?.items ?? [],
                         menu: savedMenuAI,
-                        translations: translator.translatedText
+                        translations: savedOCRData?.translations ?? [:]
                     )
+    
+                    if let menu = savedMenuAI {
+                        ScrollView {
+                            ForEach(menu.sections.indices, id: \.self) { sectionIndex in
+                                Divider()
+                                let section = menu.sections[sectionIndex]
+                                Text(section.title).font(.title2).bold()
+                                ForEach(section.items.indices, id: \.self) { itemIndex in
+                                    let item = section.items[itemIndex]
+                                    Text(item.english)
+                                }
+                            }
+                        }
+                    }
+                    
                     Spacer()
                 }
                 .toolbar {
@@ -64,8 +79,7 @@ struct SavedMenuView: View {
                         Button {
                             shouldDelete = true
                         } label: {
-                            Image(systemName: "trash")
-                                .font(.title2)
+                            Image(systemName: "trash").font(.title2)
                         }
                     }
                 }

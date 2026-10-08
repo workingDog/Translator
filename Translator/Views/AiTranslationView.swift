@@ -21,7 +21,7 @@ struct AiTranslationView: View {
     var body: some View {
         
         ZStack {
-            AppBackground().ignoresSafeArea()
+            Color.clear.ignoresSafeArea()
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
@@ -29,15 +29,6 @@ struct AiTranslationView: View {
                         HStack {
                             Spacer()
                             ProgressView()
-                            Spacer()
-                        }
-                    } else {
-                        HStack {
-                            Spacer()
-                            Button("Do test") {
-                                doTest()
-                            }
-                            .buttonStyle(.borderedProminent)
                             Spacer()
                         }
                     }
@@ -57,39 +48,24 @@ struct AiTranslationView: View {
                             }
                         }
                     }
-                    
-//                    if let ai = decoded.ai {
-//                        ForEach(ai.sections, id: \.title) { section in
-//                            Text(section.title)
-//                            ForEach(section.items, id: \.japanese) { item in
-//                                Text(item.english)
-//                                if let description = item.description {
-//                                    Text(description)
-//                                }
-//                                if let price = item.price {
-//                                    Text(price)
-//                                }
-//                            }
-//                        }
-//                    }
-        
                 }
             }.padding(10)
         }
-        .navigationTitle("Test")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    func doTest() {
-        isBusi = true
-        Task {
-            if let img = translator.selectedImage, let cgimg = img.cgImage {
-                menu = await analyzeMenuImage(cgimg)
-                isBusi = false
+        .task {
+            isBusi = true
+            Task {
+                if let img = translator.selectedImage, let cgimg = img.cgImage {
+                    menu = await analyzeMenuImage(cgimg)
+                    if let menu {
+                        let translations = translator.makeTranslations(from: menu, ocrItems: translator.ocrTextItems)
+                        translator.translatedText = translations
+                    }
+                    isBusi = false
+                }
             }
         }
     }
-   
+    
     func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
         do {
             let session = LanguageModelSession(tools: [OCRTool()])
@@ -112,22 +88,3 @@ struct AiTranslationView: View {
     }
     
 }
-
-
-
-/*
- 
- """
- Read the Japanese text in the attached image labelled "MENU-IMAGE".
- Use the OCR tool to read the text.
- Translate the text into natural English.
- Organize the translated text into menu sections and individual menu items.
- """
- 
- """
- Read the Japanese text in the attached image labelled "MENU-IMAGE".
- Use the OCR tool to read the text.
- Translate the text into natural English.
- """
-
- */
