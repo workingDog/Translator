@@ -25,7 +25,8 @@ struct SavedMenuView: View {
             AppBackground().ignoresSafeArea()
             
             if let image = UIImage(data: menu.imageData) {
-                let savedOCRData = menu.ocrData.flatMap { try? JSONDecoder().decode(SavedOCRData.self, from: $0) }
+                let (savedOCRData, savedMenuAI) = decodeMenu(menu)
+                
                 VStack(spacing: 10) {
                     Button {
                         showEditSheet = true
@@ -38,31 +39,24 @@ struct SavedMenuView: View {
                     }
                     .buttonStyle(.plain)
                     .padding(10)
+                    
                     HStack {
                         Image(systemName: "textformat.size").bold()
-                        
                         Slider(value: $translator.fontScale, in: 0.7...1.8, step: 0.05)
                             .padding(15)
                             .frame(height: 50)
-                        
                         Text("\(Int(translator.fontScale * 100))%")
                             .monospacedDigit()
                             .frame(width: 45, alignment: .trailing)
                     }
                     .padding(.horizontal)
-                    if let savedOCRData {
-                        ZoomableImageView(
-                            image: image,
-                            items: savedOCRData.items,
-                            translations: savedOCRData.translations
-                        )
-                    } else {
-                        ZoomableImageView(
-                            image: image,
-                            items: [],
-                            translations: [:]
-                        )
-                    }
+                    
+                    ZoomableImageView(
+                        image: image,
+                        items: savedOCRData?.items ?? [],
+                        menu: savedMenuAI,
+                        translations: translator.translatedText
+                    )
                     Spacer()
                 }
                 .toolbar {
@@ -91,4 +85,11 @@ struct SavedMenuView: View {
             }
         }
     }
+    
+    func decodeMenu(_ menu: TranslatedMenu) -> (ocr: SavedOCRData?, ai: MenuTranslation?) {
+        let ocr = menu.ocrData.flatMap { try? JSONDecoder().decode(SavedOCRData.self, from: $0) }
+        let ai = menu.aiData.flatMap { try? JSONDecoder().decode(MenuTranslation.self, from: $0) }
+        return (ocr, ai)
+    }
+    
 }

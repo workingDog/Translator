@@ -58,6 +58,21 @@ struct AiTranslationView: View {
                         }
                     }
                     
+//                    if let ai = decoded.ai {
+//                        ForEach(ai.sections, id: \.title) { section in
+//                            Text(section.title)
+//                            ForEach(section.items, id: \.japanese) { item in
+//                                Text(item.english)
+//                                if let description = item.description {
+//                                    Text(description)
+//                                }
+//                                if let price = item.price {
+//                                    Text(price)
+//                                }
+//                            }
+//                        }
+//                    }
+        
                 }
             }.padding(10)
         }
@@ -79,12 +94,13 @@ struct AiTranslationView: View {
         do {
             let session = LanguageModelSession(tools: [OCRTool()])
             let response = try await session.respond(generating: MenuTranslation.self) {
-                    """
-                    Read the Japanese text in the attached image labelled "MENU-IMAGE".
-                    Use the OCR tool to read the text.
-                    Translate the text into natural English.
-                    Organize the translated text into menu sections and individual menu items.
-                    """
+            """
+            Read the Japanese text in the attached image labelled "MENU-IMAGE".
+            Use the OCR tool to read the text.
+            Translate the text into natural English.
+            Organize the translated text into menu sections and individual menu items.
+            Include descriptions and prices when they are present.
+            """
                 Attachment(image)
                     .label("MENU-IMAGE")
             }
@@ -97,24 +113,6 @@ struct AiTranslationView: View {
     
 }
 
-@Generable
-struct MenuTranslation {
-    var sections: [MenuSection]
-}
-
-@Generable
-struct MenuSection {
-    var title: String
-    var items: [MenuItem]
-}
-
-@Generable
-struct MenuItem {
-    var japanese: String
-    var english: String
-    var description: String?
-    var price: String?
-}
 
 
 /*
@@ -123,18 +121,13 @@ struct MenuItem {
  Read the Japanese text in the attached image labelled "MENU-IMAGE".
  Use the OCR tool to read the text.
  Translate the text into natural English.
+ Organize the translated text into menu sections and individual menu items.
  """
  
  """
- Analyze the attached image labelled "MENU-IMAGE".
- Use the OCR tool to read the Japanese menu.
- Identify the menu sections and individual menu items.
- Translate the Japanese into natural, idiomatic English.
- For each item:
- - Preserve the original Japanese name.
- - Provide a natural English translation.
- - Include the description only if one is present.
- - Include the price only if one is present.
- - Do not invent or infer information that is not visible in the menu.
+ Read the Japanese text in the attached image labelled "MENU-IMAGE".
+ Use the OCR tool to read the text.
+ Translate the text into natural English.
  """
+
  */

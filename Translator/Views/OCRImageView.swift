@@ -15,6 +15,7 @@ import SwiftUI
              ZoomableImageView(
                  image: image,
                  items: translator.ocrTextItems,
+                 menu: nil,
                  translations: translator.translatedText
              )
          }

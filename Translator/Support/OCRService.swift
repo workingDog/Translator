@@ -10,23 +10,6 @@ import UIKit
 import ImageIO
 
 
-struct SavedOCRData: Codable {
-    let items: [OCRTextItem]
-    let translations: [UUID: String]
-}
-
-nonisolated struct OCRTextItem: Identifiable, Codable {
-    let id: UUID
-    let text: String
-    let boundingBox: CGRect
-    
-    init(id: UUID = UUID(), text: String, boundingBox: CGRect) {
-        self.id = id
-        self.text = text
-        self.boundingBox = boundingBox
-    }
-}
-
 struct OCRService {
 
     func recognizeJapaneseText(from image: UIImage) async throws -> [OCRTextItem] {

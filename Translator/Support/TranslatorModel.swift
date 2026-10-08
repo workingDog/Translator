@@ -14,20 +14,14 @@ import Translation
 final class TranslatorModel {
     
     var testImage: UIImage?
-    
     var selectedImage: UIImage?
     var japaneseText = ""
     var englishText = ""
     var isProcessing = false
     var errorMessage: String?
     var fontScale: Double = 1.0
-    
-    // Changing this causes the translationTask modifier to receive
-    // a new translation configuration.
     var translationConfiguration: TranslationSession.Configuration?
-    
     var translatedText: [UUID: String] = [:]
-    
     var ocrTextItems: [OCRTextItem] = []
     
     @ObservationIgnored var ocrService = OCRService()
@@ -46,11 +40,8 @@ final class TranslatorModel {
         
         do {
             ocrTextItems = try await ocrService.recognizeJapaneseText(from: image)
-            
-            let text = ocrTextItems.reconstructedText() // see Utility Array extension
-            
+            let text = ocrTextItems.reconstructedText()
             japaneseText = text
-            
             guard !text.trim().isEmpty else {
                 errorMessage = "No Japanese text was recognized."
                 isProcessing = false
@@ -65,45 +56,39 @@ final class TranslatorModel {
     func translate(using session: TranslationSession) async {
         isProcessing = true
         let source = japaneseText.trim()
-        guard !source.isEmpty else { return }
+        guard !source.isEmpty else {
+            isProcessing = false
+            return
+        }
         do {
             let response = try await session.translate(source)
             englishText = response.targetText
-            isProcessing = false
         } catch {
             errorMessage = error.localizedDescription
-            isProcessing = false
         }
+        isProcessing = false
     }
     
     @MainActor
     func renderTranslatedMenu() -> UIImage {
-        
         guard let image = selectedImage else { return UIImage() }
-        
         let renderer = UIGraphicsImageRenderer(size: image.size)
         
         return renderer.image { context in
             image.draw(in: CGRect(origin: .zero, size: image.size))
-            
             for item in ocrTextItems {
                 guard let translation = translatedText[item.id], !translation.isEmpty else { continue }
-                
                 let box = CGRect(
                     x: item.boundingBox.minX * image.size.width,
                     y: (1 - item.boundingBox.maxY) * image.size.height,
                     width: item.boundingBox.width * image.size.width,
                     height: item.boundingBox.height * image.size.height
                 )
-                
                 let fontSize = max(box.height * 0.72 * fontScale, 8)
                 let font = UIFont.systemFont(ofSize: fontSize)
                 let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: UIColor.label]
-                
                 UIColor.systemBackground.withAlphaComponent(0.92).setFill()
-                
                 UIBezierPath(roundedRect: box.insetBy(dx: -4, dy: -2), cornerRadius: 3).fill()
-                
                 (translation as NSString).draw(in: box.insetBy(dx: 4, dy: 2), withAttributes: attributes)
             }
         }
@@ -121,10 +106,9 @@ final class TranslatorModel {
         
         guard let ocrData = try? JSONEncoder().encode(savedOCRData) else { return }
         
-        let menu = TranslatedMenu(title: title, imageData: imageData, ocrData: ocrData)
+        let savedMenu = TranslatedMenu(title: title, imageData: imageData, ocrData: ocrData)
         
-        modelContext.insert(menu)
-        
+        modelContext.insert(savedMenu)
         do {
             try modelContext.save()
         } catch {
@@ -149,5 +133,17 @@ final class TranslatorModel {
             errorMessage = error.localizedDescription
         }
         isProcessing = false
+    }
+    
+    func makeTranslations(from menu: MenuTranslation, ocrItems: [OCRTextItem]) -> [UUID: String] {
+        var translations: [UUID: String] = [:]
+        for section in menu.sections {
+            for menuItem in section.items {
+                if let ocrItem = ocrItems.first(where: { $0.text == menuItem.japanese }) {
+                    translations[ocrItem.id] = menuItem.english
+                }
+            }
+        }
+        return translations
     }
 }
