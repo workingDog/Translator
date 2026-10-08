@@ -45,6 +45,11 @@ struct ContentView: View {
                 
                 VStack(spacing: 12) {
                     
+                    Text("Translator")
+                        .font(.system(size: 28, weight: .bold))
+                        .padding(.horizontal, 10)
+                        .padding(.top, -30)
+                    
                     selectedImagesView
                     
                     if let errorMessage = translator.errorMessage {
@@ -52,7 +57,6 @@ struct ContentView: View {
                     }
                 }
                 .padding()
-                .navigationTitle("Translator")
                 .navigationDestination(item: $route) { route in
                     if route == .store {
                         SavedTranslationView()

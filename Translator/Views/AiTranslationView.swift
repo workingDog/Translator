@@ -65,28 +65,7 @@ struct AiTranslationView: View {
             }
         }
     }
-    
-    //    func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
-    //        do {
-    //            let session = LanguageModelSession(tools: [OCRTool()])
-    //            let response = try await session.respond(generating: MenuTranslation.self) {
-    //            """
-    //            Read the Japanese text in the attached image labelled "MENU-IMAGE".
-    //            Use the OCR tool to read the text.
-    //            Translate the text into natural English.
-    //            Organize the translated text into menu sections and individual menu items.
-    //            Include descriptions and prices when they are present.
-    //            """
-    //                Attachment(image)
-    //                    .label("MENU-IMAGE")
-    //            }
-    //            return response.content
-    //        } catch {
-    //            print(error)
-    //            return nil
-    //        }
-    //    }
-    
+
     func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
         let model = SystemLanguageModel.default
         
