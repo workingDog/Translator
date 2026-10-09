@@ -66,10 +66,15 @@ struct SavedMenuView: View {
                                 Text(section.title).font(.title2).bold()
                                 ForEach(section.items.indices, id: \.self) { itemIndex in
                                     let item = section.items[itemIndex]
-                                    Text(item.english)
+                                    HStack {
+                                        Text(item.english)
+                                        Spacer()
+                                        Text(item.price ?? "")
+                                    }
                                 }
                             }
                         }
+                        .padding(10)
                     }
                     
                     Spacer()

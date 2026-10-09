@@ -162,7 +162,48 @@ final class TranslatorModel {
             print("Foundation Models unavailable: \(model.availability)")
             return nil
         }
-        
+       
+        do {
+            let session = LanguageModelSession(tools: [OCRTool()]) {
+                """
+                You are an expert Japanese-to-English menu translator.
+
+                Accurately translate Japanese restaurant menus into natural,
+                clear English while preserving the meaning of the original text.
+
+                Use the OCR tool to recognise the Japanese text in the supplied image.
+                Never invent text, menu items, descriptions, or prices.
+                Translate all section titles, category headings, item names,
+                and descriptions into English.
+                All section titles and category headings must be in English.
+                Include descriptions and prices when they are present, but do not include them in the menu items.
+                Organise the results into the appropriate menu sections and items.
+                """
+            }
+            
+            let response = try await session.respond(generating: MenuTranslation.self) {
+                """
+                Analyse the attached image labelled "MENU-IMAGE".
+
+                Read the Japanese text using the OCR tool and translate the complete
+                menu into English.
+
+                Include all identifiable menu sections, individual items,
+                descriptions, and prices.
+
+                Return the results using the MenuTranslation structure.
+                """
+                Attachment(image).label("MENU-IMAGE")
+            }
+            
+            return response.content
+            
+        } catch {
+            print("Menu analysis failed: \(error)")
+            return nil
+        }
+         
+        /*
         do {
             let session = LanguageModelSession(tools: [OCRTool()])
             let response = try await session.respond(generating: MenuTranslation.self) {
@@ -181,6 +222,7 @@ final class TranslatorModel {
             print("Menu analysis failed: \(error)")
             return nil
         }
+         */
     }
     
     func doAiTranslation() async -> MenuTranslation? {

@@ -20,7 +20,7 @@ struct AiTranslationView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 10) {
                 if translator.isProcessing {
                     HStack {
                         Spacer()
@@ -43,7 +43,11 @@ struct AiTranslationView: View {
                         Text(section.title).font(.title2).bold()
                         ForEach(section.items.indices, id: \.self) { itemIndex in
                             let item = section.items[itemIndex]
-                            Text(item.english)
+                            HStack {
+                                Text(item.english)
+                                Spacer()
+                                Text(item.price ?? "")
+                            }
                         }
                     }
                 }
