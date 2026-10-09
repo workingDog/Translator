@@ -20,7 +20,7 @@ struct TranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
-    @State private var mode: TransMode?
+    @State private var mode: TransMode? = .ai
     @State private var isSaved = false
     
     @State private var modelTest = ""
@@ -29,25 +29,7 @@ struct TranslationView: View {
         ZStack {
             AppBackground().ignoresSafeArea()
             
-            VStack(alignment: .leading, spacing: 12) {
-     
-                HStack {
-                    Spacer()
-                    
-                    Picker("", selection: $mode) {
-                        Text("OCR").tag(TransMode.ocr)
-                        Text("AI").tag(TransMode.ai)
-                    }
-                    .pickerStyle(.segmented)
-                    .font(.system(size: 30, weight: .semibold))
-                    .frame(width: 180)
-                    .padding(20)
-                    
-                    Spacer()
-                }.padding(20)
-                
-                Spacer()
-                
+            VStack(alignment: .leading, spacing: 5) {
                 if mode == .ocr {
                     EnglishView()
                 }
@@ -55,12 +37,12 @@ struct TranslationView: View {
                 if mode == .ai {
                     AiTranslationView()
                 }
-                
-            } // VStack
+            }
             .padding(10)
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                
                 Button("Save") {
                     if !isSaved {
                         translator.saveTranslatedMenu(
@@ -68,33 +50,17 @@ struct TranslationView: View {
                             modelContext: modelContext)
                         isSaved = true
                     }
-                }
-                .disabled(isSaved)
+                }.disabled(isSaved)
+                
+                Button("OCR") {
+                    mode = .ocr
+                }.tint(mode == .ocr ? .blue : .primary)
+                
+                Button("AI") {
+                    mode = .ai
+                }.tint(mode == .ai ? .blue : .primary)
             }
         }
     }
 
 }
-
-
-
-
-
-
-//                Button("Test Foundation Model") {
-//                    Task {
-//                        let model = SystemLanguageModel.default
-//                        print("Before request: \(model.availability)")
-//                        guard case .available = model.availability else {
-//                            modelTest = "Model unavailable: \(model.availability)"
-//                            return
-//                        }
-//                        do {
-//                            let session = LanguageModelSession()
-//                            let response = try await session.respond(to: "Reply with exactly: Model works")
-//                            modelTest = response.content
-//                        } catch {
-//                            modelTest = "Error: \(error.localizedDescription)"
-//                        }
-//                    }
-//                }.buttonStyle(.borderedProminent)

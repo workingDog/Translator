@@ -18,7 +18,7 @@ struct EnglishView: View {
         @Bindable var translator = translator
         
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Image(systemName: "textformat.size").bold()
                     
@@ -44,6 +44,7 @@ struct EnglishView: View {
             .padding(10)
         }
         .task {
+            translator.isProcessing = true
             // do OCR
             await translator.doRecognition()
             // do translation
@@ -55,7 +56,9 @@ struct EnglishView: View {
         }
         // when translator.translationConfiguration changed, it will activate this task
         .translationTask(translator.translationConfiguration) { session in
+            translator.isProcessing = true
             await translator.translateOCRItems(using: session)
+            translator.isProcessing = false
         }
     }
     

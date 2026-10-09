@@ -7,6 +7,8 @@
 import SwiftUI
 import SwiftData
 import Translation
+import FoundationModels
+import Vision
 
 
 @MainActor
@@ -37,7 +39,6 @@ final class TranslatorModel {
         japaneseText = ""
         englishText = ""
         errorMessage = nil
-        isProcessing = true
         
         do {
             ocrTextItems = try await ocrService.recognizeJapaneseText(from: image)
@@ -45,20 +46,16 @@ final class TranslatorModel {
             japaneseText = text
             guard !text.trim().isEmpty else {
                 errorMessage = "No Japanese text was recognized."
-                isProcessing = false
                 return
             }
         } catch {
             errorMessage = error.localizedDescription
         }
-        isProcessing = false
     }
     
     func translate(using session: TranslationSession) async {
-        isProcessing = true
         let source = japaneseText.trim()
         guard !source.isEmpty else {
-            isProcessing = false
             return
         }
         do {
@@ -67,7 +64,6 @@ final class TranslatorModel {
         } catch {
             errorMessage = error.localizedDescription
         }
-        isProcessing = false
     }
     
     @MainActor
@@ -96,7 +92,6 @@ final class TranslatorModel {
     }
     
     func translateOCRItems(using session: TranslationSession) async {
-        isProcessing = true
         let requests = ocrTextItems.map {
             TranslationSession.Request(sourceText: $0.text)
         }
@@ -111,7 +106,6 @@ final class TranslatorModel {
             translatedText = Dictionary(uniqueKeysWithValues: ocrTextItems.map { ($0.id, $0.text) })
             errorMessage = error.localizedDescription
         }
-        isProcessing = false
     }
     
     @MainActor
@@ -142,6 +136,8 @@ final class TranslatorModel {
         }
     }
     
+    //---------------AI-----------------------------
+    
     func makeTranslations(from menu: MenuTranslation, ocrItems: [OCRTextItem]) -> [UUID: String] {
         menuTranslation = menu
         var translations: [UUID: String] = [:]
@@ -154,6 +150,52 @@ final class TranslatorModel {
             }
         }
         return translations
+    }
+
+    func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
+        let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
+        
+        print("Availability: \(model.availability)")
+        print("Variant: \(model.variant)")
+        
+        guard case .available = model.availability else {
+            print("Foundation Models unavailable: \(model.availability)")
+            return nil
+        }
+        
+        do {
+            let session = LanguageModelSession(tools: [OCRTool()])
+            let response = try await session.respond(generating: MenuTranslation.self) {
+                """
+                Read the Japanese text in the attached image labelled “MENU-IMAGE”.
+                Use the OCR tool to read the text.
+                Translate all Japanese text into natural English, including section titles, category headings, menu item names, and descriptions.
+                Organize the translated text into menu sections and individual menu items.
+                All section titles must be in English, never Japanese.
+                Include descriptions and prices when they are present.
+                """
+                Attachment(image).label("MENU-IMAGE")
+            }
+            return response.content
+        } catch {
+            print("Menu analysis failed: \(error)")
+            return nil
+        }
+    }
+    
+    func doAiTranslation() async -> MenuTranslation? {
+        if let img = selectedImage, let cgimg = img.cgImage {
+            let menu = await analyzeMenuImage(cgimg)
+            if let menu {
+                let translations = makeTranslations(
+                    from: menu,
+                    ocrItems: ocrTextItems
+                )
+                translatedText = translations
+            }
+            return menu
+        }
+        return nil
     }
 
 }
