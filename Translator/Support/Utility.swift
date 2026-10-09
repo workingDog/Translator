@@ -28,6 +28,16 @@ extension String {
 
 extension UIImage {
     
+    // a blank image of the given size
+    convenience init(size: CGSize) {
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let image = renderer.image { context in
+            UIColor.clear.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+        }
+        self.init(cgImage: image.cgImage!)
+    }
+    
     func resizedToFitWidth(_ targetWidth: CGFloat) -> UIImage {
         let scale = targetWidth / self.size.width
         let newHeight = self.size.height * scale

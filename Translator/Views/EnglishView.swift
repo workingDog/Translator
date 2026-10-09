@@ -15,19 +15,19 @@ struct EnglishView: View {
     var body: some View {
         @Bindable var translator = translator
         
+        HStack {
+            Image(systemName: "textformat.size").bold()
+            
+            Slider(value: $translator.fontScale, in: 0.7...1.8, step: 0.05).padding(15)
+            
+            Text("\(Int(translator.fontScale * 100))%")
+                .monospacedDigit()
+                .frame(width: 45, alignment: .trailing)
+        }
+        .padding(.horizontal)
+        
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Image(systemName: "textformat.size").bold()
-                    
-                    Slider(value: $translator.fontScale, in: 0.7...1.8, step: 0.05).padding(15)
-                    
-                    Text("\(Int(translator.fontScale * 100))%")
-                        .monospacedDigit()
-                        .frame(width: 45, alignment: .trailing)
-                }
-                .padding(.horizontal)
-                
                 if translator.isProcessing {
                     HStack {
                         Spacer()
@@ -37,6 +37,10 @@ struct EnglishView: View {
                 }
                 
                 OCRImageView()
+                
+                if !translator.isProcessing {
+                    OCRImageBlankView()
+                }
                 
             }
             .padding(10)

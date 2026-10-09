@@ -1,19 +1,24 @@
 //
-//  TranslatorModel.swift
+//  TestTranslator.swift
 //  Translator
 //
-//  Created by Ringo Wathelet on 2026/10/05.
+//  Created by Ringo Wathelet on 2026/10/09.
 //
+
 import SwiftUI
 import SwiftData
 import Translation
-import FoundationModels
 import Vision
+import FoundationModels
+
+//import OpenFoundationModels
+
+
 
 
 @MainActor
 @Observable
-final class TranslatorModel {
+final class TestTranslator {
     
     var testImage: UIImage?
     var selectedImage: UIImage?
@@ -482,96 +487,3 @@ final class TranslatorModel {
 
 
 
-
-
-
-
-/*
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-do {
-   let session = LanguageModelSession(tools: [OCRTool()])
-   let response = try await session.respond(generating: MenuTranslation.self) {
-       """
-       Read the Japanese text in the attached image labelled “MENU-IMAGE”.
-       Use the OCR tool to read the text.
-       Translate all Japanese text into natural English, including section titles, category headings, menu item names, and descriptions.
-       Organize the translated text into menu sections and individual menu items.
-       All section titles must be in English, never Japanese.
-       Include descriptions and prices when they are present.
-       """
-       Attachment(image).label("MENU-IMAGE")
-   }
-   return response.content
-} catch {
-   print("Menu analysis failed: \(error)")
-   return nil
-}
- 
- 
- 
- 
- 
- func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
-     let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
-     
-     print("Availability: \(model.availability)")
-     print("Variant: \(model.variant)")
-     
-     guard case .available = model.availability else {
-         print("Foundation Models unavailable: \(model.availability)")
-         return nil
-     }
-    
-     do {
-         let session = LanguageModelSession(tools: [OCRTool()]) {
-             """
-             You are an expert Japanese-to-English menu translator.
-
-             Accurately translate Japanese restaurant menus into natural,
-             clear English while preserving the meaning of the original text.
-
-             Use the OCR tool to recognise the Japanese text in the supplied image.
-             Never invent text, menu items, descriptions, or prices.
-             Translate all section titles, category headings, item names,
-             and descriptions into English.
-             All section titles and category headings must be in English.
-             Include descriptions and prices when they are present, but do not include them in the menu items.
-             Organise the results into the appropriate menu sections and items.
-             """
-         }
-         
-         let response = try await session.respond(generating: MenuTranslation.self) {
-             """
-             Analyse the attached image labelled "MENU-IMAGE".
-
-             Read the Japanese text using the OCR tool and translate the complete
-             menu into English.
-
-             Include all identifiable menu sections, individual items,
-             descriptions, and prices.
-
-             Return the results using the MenuTranslation structure.
-             """
-             Attachment(image).label("MENU-IMAGE")
-         }
-         
-         return response.content
-         
-     } catch {
-         print("Menu analysis failed: \(error)")
-         return nil
-     }
-
- }
- 
- 
-*/

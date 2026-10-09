@@ -22,3 +22,19 @@ import SwiftUI
      }
  
  }
+
+struct OCRImageBlankView: View {
+    @Environment(TranslatorModel.self) private var translator
+
+    var body: some View {
+        if let image = translator.selectedImage {
+            ZoomableImageView(
+                image: UIImage(size: image.size),
+                items: translator.ocrTextItems,
+                menu: nil,
+                translations: translator.translatedText
+            )
+        }
+    }
+
+}
