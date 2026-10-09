@@ -11,6 +11,33 @@ import ImageIO
 
 
 struct OCRService {
+    
+    func recognizeJapaneseText(from image: UIImage) async throws -> [OCRTextItem] {
+        let resizedImage = image.resizedToMaximumDimension(2500)
+        
+        guard let cgImage = resizedImage.cgImage else {
+            throw OCRError.invalidImage
+        }
+        return try await Task.detached(priority: .userInitiated) {
+            let request = VNRecognizeTextRequest()
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = false
+            request.recognitionLanguages = ["ja-JP"]
+            
+            let handler = await VNImageRequestHandler(cgImage: cgImage, orientation: resizedImage.cgImagePropertyOrientation)
+            
+            try handler.perform([request])
+            
+            return (request.results ?? []).compactMap { observation -> OCRTextItem? in
+                guard let text = observation.topCandidates(1).first?.string else { return nil }
+                return OCRTextItem(text: text, boundingBox: observation.boundingBox)
+            }
+        }.value
+    }
+
+}
+
+struct OCRService1 {
 
     func recognizeJapaneseText(from image: UIImage) async throws -> [OCRTextItem] {
         guard let cgImage = image.cgImage else {

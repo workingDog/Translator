@@ -53,6 +53,19 @@ extension UIImage {
         }
     }
     
+    func resizedToMaximumDimension(_ maximumDimension: CGFloat) -> UIImage {
+        let longestDimension = max(size.width, size.height)
+        guard longestDimension > maximumDimension else { return self }
+        
+        let scale = maximumDimension / longestDimension
+        let newSize = CGSize(width: size.width * scale, height: size.height * scale)
+        let renderer = UIGraphicsImageRenderer(size: newSize)
+        
+        return renderer.image { _ in
+            draw(in: CGRect(origin: .zero, size: newSize))
+        }
+    }
+    
 }
 
 extension Array where Element == OCRTextItem {

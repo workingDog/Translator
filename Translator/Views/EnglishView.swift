@@ -5,12 +5,10 @@
 //  Created by Ringo Wathelet on 2026/10/05.
 //
 import SwiftUI
-import SwiftData
 import Translation
 
 
 struct EnglishView: View {
-    @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
     

@@ -20,7 +20,7 @@ struct TranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
-    @State private var mode: TransMode? = .ai
+    @State private var mode: TransMode? = .ocr
     @State private var isSaved = false
     
     @State private var modelTest = ""
@@ -33,7 +33,6 @@ struct TranslationView: View {
                 if mode == .ocr {
                     EnglishView()
                 }
-                
                 if mode == .ai {
                     AiTranslationView()
                 }
