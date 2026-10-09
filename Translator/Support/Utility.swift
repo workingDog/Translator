@@ -53,7 +53,7 @@ extension UIImage {
         }
     }
     
-    func resizedToMaximumDimension(_ maximumDimension: CGFloat) -> UIImage {
+    func resizedToMaximumDimension1(_ maximumDimension: CGFloat) -> UIImage {
         let longestDimension = max(size.width, size.height)
         guard longestDimension > maximumDimension else { return self }
         
@@ -65,6 +65,23 @@ extension UIImage {
             draw(in: CGRect(origin: .zero, size: newSize))
         }
     }
+    
+    func resizedToMaximumDimension(_ maximumDimension: CGFloat) -> UIImage {
+        let pixelWidth = size.width * scale
+        let pixelHeight = size.height * scale
+        let longestDimension = max(pixelWidth, pixelHeight)
+        
+        guard longestDimension > maximumDimension else { return self }
+        
+        let factor = maximumDimension / longestDimension
+        let newSize = CGSize(width: size.width * factor, height: size.height * factor)
+        let renderer = UIGraphicsImageRenderer(size: newSize)
+        
+        return renderer.image { _ in
+            draw(in: CGRect(origin: .zero, size: newSize))
+        }
+    }
+
     
 }
 

@@ -196,20 +196,23 @@ final class TranslatorModel {
     }
 
     func doAiTranslation() async -> MenuTranslation? {
-        if let img = selectedImage, let cgimg = img.cgImage {
-            let menu = await analyzeMenuImage(cgimg)
-            if let menu {
-                let translations = makeTranslations(
-                    from: menu,
-                    ocrItems: ocrTextItems
-                )
-                translatedText = translations
+        if let selectedImage {
+            let resizedImage = selectedImage.resizedToMaximumDimension(2500)
+            if let cgimg = resizedImage.cgImage {
+                let menu = await analyzeMenuImage(cgimg)
+                if let menu {
+                    let translations = makeTranslations(
+                        from: menu,
+                        ocrItems: ocrTextItems
+                    )
+                    translatedText = translations
+                }
+                return menu
             }
-            return menu
         }
         return nil
     }
-    
+
     //---------------experiment-----------------------------
     
     func analyzeMenuImage3(_ image: CGImage, depth: Int = 0) async -> MenuTranslation? {
@@ -316,6 +319,103 @@ final class TranslatorModel {
         }
         return combined
     }
+    
+    func countMenuInputTokens() async {
+        let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
+        
+        let instructions = Instructions {
+            """
+            You are an expert Japanese-to-English menu translator.
+            Accurately translate Japanese restaurant menus into natural,
+            clear English while preserving the meaning of the original text.
+            Use the OCR tool to recognise the Japanese text in the supplied image.
+            Never invent text, menu items, descriptions, or prices.
+            Translate all section titles, category headings, item names,
+            and descriptions into English.
+            All section titles and category headings must be in English.
+            Include descriptions and prices when present, but do not include them in menu items.
+            Organise the results into the appropriate menu sections and items.
+            """
+        }
+        
+        let prompt = Prompt {
+            """
+            Analyse the attached image labelled "MENU-IMAGE".
+            Read the Japanese text using the OCR tool and translate the complete
+            menu into English.
+            Include all identifiable menu sections, individual items,
+            descriptions, and prices.
+            Return the results using the MenuTranslation structure.
+            """
+        }
+        
+        do {
+            let instructionTokens = try await model.tokenCount(for: instructions)
+            let promptTokens = try await model.tokenCount(for: prompt)
+            let toolTokens = try await model.tokenCount(for: [OCRTool()])
+            let schemaTokens = try await model.tokenCount(for: MenuTranslation.generationSchema)
+            
+            print("Instructions: \(instructionTokens)")
+            print("Prompt: \(promptTokens)")
+            print("OCRTool: \(toolTokens)")
+            print("MenuTranslation schema: \(schemaTokens)")
+            print("Subtotal (excluding image and other overhead): \(instructionTokens + promptTokens + toolTokens + schemaTokens)")
+            print("Model context size: \(model.contextSize)")
+        } catch {
+            print("Token counting failed: \(error)")
+        }
+        
+    }
+    
+    func analyzeMenuOCR(_ items: [OCRTextItem]) async -> MenuTranslation? {
+        let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
+        
+        guard case .available = model.availability else { return nil }
+        
+        do {
+            let session = LanguageModelSession {
+                """
+                You are an expert Japanese menu translator.
+                Translate the supplied Japanese OCR text into concise, natural English.
+                Preserve every identifiable menu section, item, description, and price.
+                Translate all headings into English.
+                Never invent or omit identifiable menu items or prices.
+                Use the bounding boxes to understand the reading order and group items into sections.
+                Keep descriptions and prices separate from item names.
+                """
+            }
+            
+            let ocrText = items.map {
+                "Text: \($0.text), Bounding box: x=\($0.boundingBox.origin.x), y=\($0.boundingBox.origin.y), width=\($0.boundingBox.width), height=\($0.boundingBox.height)"
+            }.joined(separator: "\n")
+            
+            let response = try await session.respond(generating: MenuTranslation.self) {
+                "Translate the following Japanese menu OCR results into English. Preserve all sections and items:\n\(ocrText)"
+            }
+            
+            return response.content
+            
+        } catch {
+            print("Menu analysis failed: \(error)")
+            return nil
+        }
+    }
+
+    func doAiTranslation(items: [OCRTextItem]) async -> MenuTranslation? {
+        if !items.isEmpty {
+            let menu = await analyzeMenuOCR(items)
+            if let menu {
+                let translations = makeTranslations(
+                    from: menu,
+                    ocrItems: ocrTextItems
+                )
+                translatedText = translations
+            }
+            return menu
+        }
+        return nil
+    }
+    
     
 }
 
