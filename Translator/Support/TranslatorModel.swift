@@ -151,7 +151,7 @@ final class TranslatorModel {
         }
         return translations
     }
-
+    
     func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
         let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
         
@@ -166,32 +166,22 @@ final class TranslatorModel {
         do {
             let session = LanguageModelSession(tools: [OCRTool()]) {
                 """
-                You are an expert Japanese-to-English menu translator.
-
-                Accurately translate Japanese restaurant menus into natural,
-                clear English while preserving the meaning of the original text.
-
-                Use the OCR tool to recognise the Japanese text in the supplied image.
-                Never invent text, menu items, descriptions, or prices.
-                Translate all section titles, category headings, item names,
-                and descriptions into English.
-                All section titles and category headings must be in English.
-                Include descriptions and prices when they are present, but do not include them in the menu items.
-                Organise the results into the appropriate menu sections and items.
+                You are an expert Japanese menu translator.
+                Use the OCR tool to read the supplied image.
+                Translate Japanese into concise, natural English.
+                Preserve all identifiable menu sections, items, descriptions, and prices.
+                Translate all headings into English.
+                Never invent or omit identifiable menu items or prices.
+                Keep descriptions and prices separate from item names, and do not include them in the menu items.
+                Minimize unnecessary wording in the output.
+                Keep the structured response as concise as possible.
                 """
             }
-            
             let response = try await session.respond(generating: MenuTranslation.self) {
                 """
-                Analyse the attached image labelled "MENU-IMAGE".
-
-                Read the Japanese text using the OCR tool and translate the complete
-                menu into English.
-
-                Include all identifiable menu sections, individual items,
-                descriptions, and prices.
-
-                Return the results using the MenuTranslation structure.
+                Translate the menu in this image "MENU-IMAGE" into English.
+                Prioritize completeness and concise output.
+                Return the results using MenuTranslation.
                 """
                 Attachment(image).label("MENU-IMAGE")
             }
@@ -202,29 +192,9 @@ final class TranslatorModel {
             print("Menu analysis failed: \(error)")
             return nil
         }
-         
-        /*
-        do {
-            let session = LanguageModelSession(tools: [OCRTool()])
-            let response = try await session.respond(generating: MenuTranslation.self) {
-                """
-                Read the Japanese text in the attached image labelled “MENU-IMAGE”.
-                Use the OCR tool to read the text.
-                Translate all Japanese text into natural English, including section titles, category headings, menu item names, and descriptions.
-                Organize the translated text into menu sections and individual menu items.
-                All section titles must be in English, never Japanese.
-                Include descriptions and prices when they are present.
-                """
-                Attachment(image).label("MENU-IMAGE")
-            }
-            return response.content
-        } catch {
-            print("Menu analysis failed: \(error)")
-            return nil
-        }
-         */
+
     }
-    
+
     func doAiTranslation() async -> MenuTranslation? {
         if let img = selectedImage, let cgimg = img.cgImage {
             let menu = await analyzeMenuImage(cgimg)
@@ -239,5 +209,208 @@ final class TranslatorModel {
         }
         return nil
     }
+    
+    //---------------experiment-----------------------------
+    
+    func analyzeMenuImage3(_ image: CGImage, depth: Int = 0) async -> MenuTranslation? {
+        let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
+        
+        guard case .available = model.availability else {
+            print("Foundation Models unavailable: \(model.availability)")
+            return nil
+        }
+        if let result = await translateMenuPart(image) {
+            return result
+        }
+        guard depth < 5, let parts = splitImage(image) else {
+            print("Unable to translate image at split depth \(depth).")
+            return nil
+        }
+        guard let first = await analyzeMenuImage3(parts[0], depth: depth + 1) else { return nil }
+        guard let second = await analyzeMenuImage3(parts[1], depth: depth + 1) else { return nil }
+        return combineTranslations(first, second)
+    }
+    
+    func translateMenuPart(_ image: CGImage) async -> MenuTranslation? {
+        let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
 
+        guard case .available = model.availability else {
+            print("Foundation Models unavailable: \(model.availability)")
+            return nil
+        }
+       
+        do {
+            let session = LanguageModelSession(tools: [OCRTool()]) {
+                """
+                You are an expert Japanese menu translator.
+                Use the OCR tool to read the supplied image.
+                Translate Japanese into concise, natural English.
+                Preserve all identifiable menu sections, items, descriptions, and prices.
+                Translate all headings into English.
+                Never invent or omit identifiable menu items or prices.
+                Keep descriptions and prices separate from item names.
+                Minimize unnecessary wording in the output.
+                Keep the structured response as concise as possible.
+                """
+            }
+            let response = try await session.respond(generating: MenuTranslation.self) {
+                """
+                Translate the menu in this image "MENU-IMAGE" into English.
+                Prioritize completeness and concise output.
+                Return the results using MenuTranslation.
+                """
+                Attachment(image).label("MENU-IMAGE")
+            }
+            
+            return response.content
+            
+        } catch {
+            print("Menu analysis failed: \(error)")
+            return nil
+        }
+
+    }
+
+    func splitImage(_ image: CGImage) -> [CGImage]? {
+        
+        let width = image.width
+        let height = image.height
+        let overlap = min(height / 20, 100)
+        let middle = height / 2
+        let topHeight = min(height, middle + overlap)
+        let bottomY = max(0, middle - overlap)
+        let bottomHeight = height - bottomY
+        
+        guard let top = image.cropping(to: CGRect(x: 0, y: 0, width: width, height: topHeight)),
+              let bottom = image.cropping(to: CGRect(x: 0, y: bottomY, width: width, height: bottomHeight)) else {
+            return nil
+        }
+        
+        return [top, bottom]
+    }
+    
+    func combineTranslations(_ first: MenuTranslation, _ second: MenuTranslation) -> MenuTranslation {
+        var combined = first
+        for secondSection in second.sections {
+            if let index = combined.sections.firstIndex(where: {
+                $0.title.localizedCaseInsensitiveCompare(secondSection.title) == .orderedSame
+            }) {
+                for item in secondSection.items {
+                    if !combined.sections[index].items.contains(where: {
+                        $0.japanese == item.japanese
+                    }) {
+                        combined.sections[index].items.append(item)
+                    }
+                }
+            } else {
+                var newSection = secondSection
+                newSection.items.removeAll { item in
+                    combined.sections.contains { section in
+                        section.items.contains { $0.japanese == item.japanese }
+                    }
+                }
+                if !newSection.items.isEmpty {
+                    combined.sections.append(newSection)
+                }
+            }
+        }
+        return combined
+    }
+    
 }
+
+
+
+
+
+
+
+/*
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+do {
+   let session = LanguageModelSession(tools: [OCRTool()])
+   let response = try await session.respond(generating: MenuTranslation.self) {
+       """
+       Read the Japanese text in the attached image labelled “MENU-IMAGE”.
+       Use the OCR tool to read the text.
+       Translate all Japanese text into natural English, including section titles, category headings, menu item names, and descriptions.
+       Organize the translated text into menu sections and individual menu items.
+       All section titles must be in English, never Japanese.
+       Include descriptions and prices when they are present.
+       """
+       Attachment(image).label("MENU-IMAGE")
+   }
+   return response.content
+} catch {
+   print("Menu analysis failed: \(error)")
+   return nil
+}
+ 
+ 
+ 
+ 
+ 
+ func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
+     let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
+     
+     print("Availability: \(model.availability)")
+     print("Variant: \(model.variant)")
+     
+     guard case .available = model.availability else {
+         print("Foundation Models unavailable: \(model.availability)")
+         return nil
+     }
+    
+     do {
+         let session = LanguageModelSession(tools: [OCRTool()]) {
+             """
+             You are an expert Japanese-to-English menu translator.
+
+             Accurately translate Japanese restaurant menus into natural,
+             clear English while preserving the meaning of the original text.
+
+             Use the OCR tool to recognise the Japanese text in the supplied image.
+             Never invent text, menu items, descriptions, or prices.
+             Translate all section titles, category headings, item names,
+             and descriptions into English.
+             All section titles and category headings must be in English.
+             Include descriptions and prices when they are present, but do not include them in the menu items.
+             Organise the results into the appropriate menu sections and items.
+             """
+         }
+         
+         let response = try await session.respond(generating: MenuTranslation.self) {
+             """
+             Analyse the attached image labelled "MENU-IMAGE".
+
+             Read the Japanese text using the OCR tool and translate the complete
+             menu into English.
+
+             Include all identifiable menu sections, individual items,
+             descriptions, and prices.
+
+             Return the results using the MenuTranslation structure.
+             """
+             Attachment(image).label("MENU-IMAGE")
+         }
+         
+         return response.content
+         
+     } catch {
+         print("Menu analysis failed: \(error)")
+         return nil
+     }
+
+ }
+ 
+ 
+*/

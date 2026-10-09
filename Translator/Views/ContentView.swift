@@ -94,9 +94,11 @@ struct ContentView: View {
         }
         // for testing
         .task {
+            if let uimg = UIImage(named: "testmenu2") {
+                selectedImages.append(ImageItem(uimage: uimg))
+            }
             if let uimg = UIImage(named: "testmenu") {
                 selectedImages.append(ImageItem(uimage: uimg))
-                translator.selectedImage = uimg
             }
         }
         .task(id: selectedPhoto) {
