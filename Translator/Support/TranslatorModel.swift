@@ -54,6 +54,7 @@ final class TranslatorModel {
         }
     }
     
+    // experiment
     func translate(using session: TranslationSession) async {
         let source = japaneseText.trim()
         guard !source.isEmpty else {

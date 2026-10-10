@@ -35,6 +35,7 @@ struct ContentView: View {
     
     @State private var showCamera = false
     @State private var showSmart = false
+    @State private var showImport = false
     @State private var cameraCancel = false
 
     
@@ -73,13 +74,20 @@ struct ContentView: View {
                             Image(systemName: "camera").font(.title2)
                         }
                     }
-                    ToolbarItem(placement: .topBarLeading) {
+                    ToolbarItem(placement: .topBarTrailing) {
                         PhotosPicker(
                             selection: $selectedPhoto,
                             matching: .images,
                             photoLibrary: .shared()
                         ) {
                             Label("Choose Menu Photo", systemImage: "photo")
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showImport = true
+                        } label: {
+                            Image(systemName: "tray.and.arrow.down")
                         }
                     }
                     ToolbarItem(placement: .principal) {
@@ -90,6 +98,18 @@ struct ContentView: View {
                         }
                     }
                 }
+            }
+        }
+        .fileImporter(
+            isPresented: $showImport,
+            allowedContentTypes: [.image],
+            allowsMultipleSelection: false
+        ) { result in
+            do {
+                let urls = try result.get()
+                doImportImage(urls: urls)
+            } catch {
+                print(error)
             }
         }
         // for testing
@@ -165,4 +185,27 @@ struct ContentView: View {
             translator.errorMessage = error.localizedDescription
         }
     }
+    
+    func doImportImage(urls: [URL]) {
+        guard let sourceURL = urls.first else { return }
+        Task {
+            let accessing = sourceURL.startAccessingSecurityScopedResource()
+            defer {
+                if accessing {
+                    sourceURL.stopAccessingSecurityScopedResource()
+                }
+            }
+            do {
+                let data = try Data(contentsOf: sourceURL)
+                guard let image = UIImage(data: data) else {
+                    print("Unable to create image from file")
+                    return
+                }
+                selectedImages.append(ImageItem(uimage: image))
+            } catch {
+                print("doImportImage error:", error)
+            }
+        }
+    }
+    
 }
