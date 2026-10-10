@@ -70,8 +70,7 @@ struct SavedMenuView: View {
                     ZoomableImageView(
                         image: imagin,
                         items: savedOCRData?.items ?? [],
-                        menu: savedMenuAI,
-                        translations: savedOCRData?.translations ?? [:]
+                        menu: savedMenuAI
                     )
                     
                     

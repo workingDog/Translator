@@ -118,10 +118,7 @@ final class TestTranslator {
         guard let image = selectedImage,
               let imageData = image.jpegData(compressionQuality: 0.9) else { return }
         
-        let savedOCRData = SavedOCRData(
-            items: ocrTextItems,
-            translations: translatedText
-        )
+        let savedOCRData = SavedOCRData(items: ocrTextItems)
         
         guard let ocrData = try? JSONEncoder().encode(savedOCRData) else { return }
         let aiData = menuTranslation.flatMap { try? JSONEncoder().encode($0) }

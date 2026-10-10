@@ -18,9 +18,7 @@ struct OCRImageView: View {
             ZoomableImageView(
                 image: imagin,
                 items: translator.ocrTextItems,
-                menu: nil,
-                translations: translator.translatedText
-            )
+                menu: nil)
         }
     }
 

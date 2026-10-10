@@ -20,7 +20,7 @@ struct TranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
-    @State private var mode: TransMode? = .ocr
+    @State private var mode: TransMode?
     @State private var isSaved = false
     
     @State private var modelTest = ""
@@ -33,26 +33,14 @@ struct TranslationView: View {
                 if mode == .ocr {
                     EnglishView()
                 }
-//                if mode == .ai {
-//                    AiTranslationView()
-//                }
+                if mode == .ai {
+                    AiTranslationView()
+                }
             }
             .padding(10)
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Save") {
-                    if !isSaved {
-                        translator.saveTranslatedMenu(
-                            title: "Restaurant Menu",
-                            modelContext: modelContext)
-                        isSaved = true
-                    }
-                }.disabled(isSaved)
-            }
-            
-//            ToolbarItemGroup(placement: .topBarTrailing) {
-//
+//            ToolbarItem(placement: .topBarTrailing) {
 //                Button("Save") {
 //                    if !isSaved {
 //                        translator.saveTranslatedMenu(
@@ -61,15 +49,27 @@ struct TranslationView: View {
 //                        isSaved = true
 //                    }
 //                }.disabled(isSaved)
-//                
-//                Button("OCR") {
-//                    mode = .ocr
-//                }.tint(mode == .ocr ? .blue : .primary)
-//                
-//                Button("AI") {
-//                    mode = .ai
-//                }.tint(mode == .ai ? .blue : .primary)
 //            }
+            
+            ToolbarItemGroup(placement: .topBarTrailing) {
+
+                Button("Save") {
+                    if !isSaved {
+                        translator.saveTranslatedMenu(
+                            title: "Restaurant Menu",
+                            modelContext: modelContext)
+                        isSaved = true
+                    }
+                }.disabled(isSaved)
+                
+                Button("OCR") {
+                    mode = .ocr
+                }.tint(mode == .ocr ? .blue : .primary)
+                
+                Button("AI") {
+                    mode = .ai
+                }.tint(mode == .ai ? .blue : .primary)
+            }
             
         }
     }

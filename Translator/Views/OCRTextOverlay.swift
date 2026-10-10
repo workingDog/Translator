@@ -11,7 +11,6 @@ struct OCRTextOverlay: View {
     @Environment(TranslatorModel.self) private var translator
     
     let item: OCRTextItem
-    let text: String
     let imageSize: CGSize
     let containerSize: CGSize
 
@@ -52,7 +51,7 @@ struct OCRTextOverlay: View {
     
     
     var body: some View {
-        Text(text)
+        Text(item.engText)
             .font(.system(size: fontSize))
             .lineLimit(1)
             .minimumScaleFactor(0.7)

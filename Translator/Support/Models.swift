@@ -33,19 +33,20 @@ final class TranslatedMenu {
 
 nonisolated struct OCRTextItem: Identifiable, Codable {
     let id: UUID
-    let text: String
-    let boundingBox: CGRect
+    var text: String
+    var engText: String
+    var boundingBox: CGRect
     
-    init(id: UUID = UUID(), text: String, boundingBox: CGRect) {
+    init(id: UUID = UUID(), text: String, engText: String, boundingBox: CGRect) {
         self.id = id
         self.text = text
+        self.engText = engText
         self.boundingBox = boundingBox
     }
 }
 
 struct SavedOCRData: Codable {
     let items: [OCRTextItem]
-    let translations: [UUID: String]
 }
 
 @Generable

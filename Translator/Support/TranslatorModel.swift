@@ -23,8 +23,9 @@ final class TranslatorModel {
     var errorMessage: String?
     var fontScale: Double = 1.0
     var translationConfiguration: TranslationSession.Configuration?
-    var translatedText: [UUID: String] = [:]
+    
     var ocrTextItems: [OCRTextItem] = []
+    
     var menuTranslation: MenuTranslation?
     
     @ObservationIgnored var ocrService = OCRService()
@@ -74,7 +75,7 @@ final class TranslatorModel {
         return renderer.image { context in
             image.draw(in: CGRect(origin: .zero, size: image.size))
             for item in ocrTextItems {
-                guard let translation = translatedText[item.id], !translation.isEmpty else { continue }
+                guard !item.text.isEmpty else { continue }
                 let box = CGRect(
                     x: item.boundingBox.minX * image.size.width,
                     y: (1 - item.boundingBox.maxY) * image.size.height,
@@ -86,24 +87,33 @@ final class TranslatorModel {
                 let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: UIColor.label]
                 UIColor.systemBackground.withAlphaComponent(0.92).setFill()
                 UIBezierPath(roundedRect: box.insetBy(dx: -4, dy: -2), cornerRadius: 3).fill()
-                (translation as NSString).draw(in: box.insetBy(dx: 4, dy: 2), withAttributes: attributes)
+                (item.text as NSString).draw(in: box.insetBy(dx: 4, dy: 2), withAttributes: attributes)
             }
         }
     }
     
     func translateOCRItems(using session: TranslationSession) async {
+        var theItems: [OCRTextItem] = []
+        
         let requests = ocrTextItems.map {
             TranslationSession.Request(sourceText: $0.text)
         }
         do {
             let responses = try await session.translations(from: requests)
-            var translations: [UUID: String] = [:]
+
             for (item, response) in zip(ocrTextItems, responses) {
-                translations[item.id] = response.targetText
+                theItems.append(
+                    OCRTextItem(
+                        id: item.id,
+                        text: item.text,
+                        engText: response.targetText,
+                        boundingBox: item.boundingBox)
+                )
             }
-            translatedText = translations
+            
+            ocrTextItems = theItems
+            
         } catch {
-            translatedText = Dictionary(uniqueKeysWithValues: ocrTextItems.map { ($0.id, $0.text) })
             errorMessage = error.localizedDescription
         }
     }
@@ -113,10 +123,7 @@ final class TranslatorModel {
         guard let image = selectedImage,
               let imageData = image.jpegData(compressionQuality: 0.9) else { return }
         
-        let savedOCRData = SavedOCRData(
-            items: ocrTextItems,
-            translations: translatedText
-        )
+        let savedOCRData = SavedOCRData(items: ocrTextItems)
         
         guard let ocrData = try? JSONEncoder().encode(savedOCRData) else { return }
         let aiData = menuTranslation.flatMap { try? JSONEncoder().encode($0) }
@@ -205,7 +212,6 @@ final class TranslatorModel {
                         from: menu,
                         ocrItems: ocrTextItems
                     )
-                    translatedText = translations
                 }
                 return menu
             }
@@ -367,6 +373,8 @@ final class TranslatorModel {
         
     }
     
+//----------------------------------------------------------
+    
     func analyzeMenuOCR(_ items: [OCRTextItem]) async -> MenuTranslation? {
         let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
         
@@ -409,13 +417,27 @@ final class TranslatorModel {
                     from: menu,
                     ocrItems: ocrTextItems
                 )
-                translatedText = translations
             }
             return menu
         }
         return nil
     }
     
+    func doAiTranslation8() async -> MenuTranslation? {
+        print("---> doAiTranslation8 ocrTextItems: \(ocrTextItems.count)\n")
+        
+ //       print("---> translatedText: \(translatedText)\n")
+        
+        
+        for item in ocrTextItems {
+            print("---> item: \(item.text) \(item.engText)")
+        }
+        print()
+            
+        return nil // await doAiTranslation(items: ocrTextItems)
+    }
+    
+ //----------------------------------------------------------
     
     func doAiTranslation9() async -> MenuTranslation? {
         if let selectedImage {
@@ -427,7 +449,6 @@ final class TranslatorModel {
                         from: menu,
                         ocrItems: ocrTextItems
                     )
-                    translatedText = translations
                 }
                 return menu
             }

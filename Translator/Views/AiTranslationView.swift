@@ -56,7 +56,7 @@ struct AiTranslationView: View {
         }
         .task {
             translator.isProcessing = true
-            menu = await translator.doAiTranslation()
+            menu = await translator.doAiTranslation8()
             translator.isProcessing = false
         }
     }

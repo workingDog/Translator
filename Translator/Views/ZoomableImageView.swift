@@ -13,7 +13,6 @@ struct ZoomableImageView: View {
     let image: UIImage
     let items: [OCRTextItem]
     let menu: MenuTranslation?
-    let translations: [UUID: String]?
     
     @State private var zoomScale: CGFloat = 1.0
     @State private var panOffset: CGSize = .zero
@@ -38,11 +37,8 @@ struct ZoomableImageView: View {
                         .frame(width: canvasSize.width, height: canvasSize.height)
                     
                     ForEach(items) { item in
-                        let theText = translations?[item.id] ?? translation(for: item) ?? item.text
-                        
                         OCRTextOverlay(
                             item: item,
-                            text: theText,
                             imageSize: image.size,
                             containerSize: canvasSize
                         )
@@ -119,16 +115,6 @@ struct ZoomableImageView: View {
             }
             .frame(height: min(600, 800 * image.size.height / image.size.width))
         }
-    }
-    
-    private func translation(for item: OCRTextItem) -> String? {
-        guard let menu else { return nil }
-        for section in menu.sections {
-            if let menuItem = section.items.first(where: { $0.japanese == item.text }) {
-                return menuItem.english
-            }
-        }
-        return nil
     }
     
     private func constrainedOffset(_ offset: CGSize, zoomScale: CGFloat, canvasSize: CGSize, viewportSize: CGSize) -> CGSize {
