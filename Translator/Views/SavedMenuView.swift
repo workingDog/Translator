@@ -55,8 +55,8 @@ struct SavedMenuView: View {
                     HStack {
                         Spacer()
                         Picker("", selection: $showClean) {
-                            Text("Original").tag(false)
-                            Text("Clean").tag(true)
+                            Text("Overlay").tag(false)
+                            Text("Transparent").tag(true)
                         }
                         .pickerStyle(.segmented)
                         .padding(10)

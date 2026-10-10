@@ -144,21 +144,7 @@ final class TranslatorModel {
     }
     
     //---------------AI-----------------------------
-    
-    func makeTranslations(from menu: MenuTranslation, ocrItems: [OCRTextItem]) -> [UUID: String] {
-        menuTranslation = menu
-        var translations: [UUID: String] = [:]
-        
-        for section in menu.sections {
-            for menuItem in section.items {
-                if let ocrItem = ocrItems.first(where: { $0.text == menuItem.japanese }) {
-                    translations[ocrItem.id] = menuItem.english
-                }
-            }
-        }
-        return translations
-    }
-    
+
     func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
         let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
         
@@ -207,12 +193,6 @@ final class TranslatorModel {
             let resizedImage = selectedImage.resizedToMaximumDimension(2500)
             if let cgimg = resizedImage.cgImage {
                 let menu = await analyzeMenuImage(cgimg)
-                if let menu {
-                    let translations = makeTranslations(
-                        from: menu,
-                        ocrItems: ocrTextItems
-                    )
-                }
                 return menu
             }
         }
@@ -375,10 +355,10 @@ final class TranslatorModel {
     
 //----------------------------------------------------------
     
-    func analyzeMenuOCR(_ items: [OCRTextItem]) async -> MenuTranslation? {
+    func analyzeMenuOCR(_ items: [OCRTextItem]) async {
         let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
         
-        guard case .available = model.availability else { return nil }
+        guard case .available = model.availability else { return }
         
         do {
             let session = LanguageModelSession {
@@ -401,40 +381,29 @@ final class TranslatorModel {
                 "Translate the following Japanese menu OCR results into English. Preserve all sections and items:\n\(ocrText)"
             }
             
-            return response.content
+   //         return response.content
             
         } catch {
             print("Menu analysis failed: \(error)")
-            return nil
         }
     }
 
     func doAiTranslation(items: [OCRTextItem]) async -> MenuTranslation? {
         if !items.isEmpty {
-            let menu = await analyzeMenuOCR(items)
-            if let menu {
-                let translations = makeTranslations(
-                    from: menu,
-                    ocrItems: ocrTextItems
-                )
-            }
-            return menu
+            await analyzeMenuOCR(items)
         }
         return nil
     }
     
     func doAiTranslation8() async -> MenuTranslation? {
         print("---> doAiTranslation8 ocrTextItems: \(ocrTextItems.count)\n")
-        
- //       print("---> translatedText: \(translatedText)\n")
-        
-        
+
         for item in ocrTextItems {
             print("---> item: \(item.text) \(item.engText)")
         }
         print()
             
-        return nil // await doAiTranslation(items: ocrTextItems)
+        return await doAiTranslation(items: ocrTextItems)
     }
     
  //----------------------------------------------------------
@@ -444,12 +413,6 @@ final class TranslatorModel {
             let resizedImage = selectedImage.resizedToMaximumDimension(2500)
             if let cgimg = resizedImage.cgImage {
                 let menu = await analyzeMenuImage9(cgimg)
-                if let menu {
-                    let translations = makeTranslations(
-                        from: menu,
-                        ocrItems: ocrTextItems
-                    )
-                }
                 return menu
             }
         }

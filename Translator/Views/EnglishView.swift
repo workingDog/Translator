@@ -31,19 +31,19 @@ struct EnglishView: View {
             if translator.isProcessing {
                 HStack {
                     Spacer()
-                    ProgressView()
+                    ProgressView().font(.title)
                     Spacer()
                 }
             } else {
                 HStack {
                     Spacer()
                     Picker("", selection: $showClean) {
-                        Text("Original").tag(false)
-                        Text("Clean").tag(true)
+                        Text("Overlay").tag(false)
+                        Text("Transparent").tag(true)
                     }
                     .pickerStyle(.segmented)
                     .padding(10)
-                    .frame(width: 200)
+                    .frame(width: 250)
                     Spacer()
                 }
                 .padding(.bottom, 10)
