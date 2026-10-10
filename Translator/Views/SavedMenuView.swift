@@ -28,63 +28,67 @@ struct SavedMenuView: View {
             if let image = UIImage(data: menu.imageData) {
                 let (savedOCRData, savedMenuAI) = decodeMenu(menu)
                 
-                VStack(alignment: .leading, spacing: 10) {
-                    Button {
-                        showEditSheet = true
-                    } label: {
-                        Text(menu.title)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .lineLimit(2)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(10)
-                    }
-                    .buttonStyle(.plain)
-                    
-                    HStack {
-                        Image(systemName: "textformat.size").bold()
-                        Slider(value: $translator.fontScale, in: 0.5...1.8, step: 0.05)
-                            .frame(height: 50)
-                        Text("\(Int(translator.fontScale * 100))%")
-                            .monospacedDigit()
-                            .frame(width: 45, alignment: .trailing)
-                    }
-                    .padding(.horizontal, 5)
-                    
-                    HStack {
-                        Image(systemName: "distribute.vertical").bold()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
                         
-                        Slider(value: $translator.spacing, in: 1...250, step: 1.0)
-                        
-                        Text("\(Int(translator.spacing))")
-                            .monospacedDigit()
-                            .frame(width: 45, alignment: .trailing)
-                    }
-                    .padding(.horizontal, 5)
-                    
-                    HStack {
-                        Spacer()
-                        Picker("", selection: $showClean) {
-                            Text("Overlay").tag(false)
-                            Text("Transparent").tag(true)
+                        Button {
+                            showEditSheet = true
+                        } label: {
+                            Text(menu.title)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .lineLimit(2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(10)
                         }
-                        .pickerStyle(.segmented)
-                        .padding(10)
-                        .frame(width: 200)
+                        .buttonStyle(.plain)
+                        
+                        HStack {
+                            Image(systemName: "textformat.size").bold()
+                            Slider(value: $translator.fontScale, in: 0.5...1.8, step: 0.05)
+                                .frame(height: 50)
+                            Text("\(Int(translator.fontScale * 100))%")
+                                .monospacedDigit()
+                                .frame(width: 45, alignment: .trailing)
+                        }
+                        .padding(.horizontal, 5)
+                        
+                        HStack {
+                            Image(systemName: "distribute.vertical").bold()
+                            
+                            Slider(value: $translator.spacing, in: 1...250, step: 1.0)
+                            
+                            Text("\(Int(translator.spacing))")
+                                .monospacedDigit()
+                                .frame(width: 45, alignment: .trailing)
+                        }
+                        .padding(.horizontal, 5)
+                        
+                        HStack {
+                            Spacer()
+                            Picker("", selection: $showClean) {
+                                Text("Overlay").tag(false)
+                                Text("Transparent").tag(true)
+                            }
+                            .pickerStyle(.segmented)
+                            .padding(10)
+                            .frame(width: 200)
+                            Spacer()
+                        }
+                        .padding(.bottom, 10)
+                        
+                        let imagin = showClean ? UIImage(size: image.size) : image
+                        
+                        ZoomableImageView(
+                            image: imagin,
+                            items: savedOCRData?.items ?? [],
+                            menu: savedMenuAI
+                        )
+                        
                         Spacer()
                     }
-                    .padding(.bottom, 10)
-                    
-                    let imagin = showClean ? UIImage(size: image.size) : image
-                    
-                    ZoomableImageView(
-                        image: imagin,
-                        items: savedOCRData?.items ?? [],
-                        menu: savedMenuAI
-                    )
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
-                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .automatic) {
                         Button {

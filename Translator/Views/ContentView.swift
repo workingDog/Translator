@@ -90,7 +90,7 @@ struct ContentView: View {
                             Image(systemName: "tray.and.arrow.down")
                         }
                     }
-                    ToolbarItem(placement: .principal) {
+                    ToolbarItem(placement: .topBarLeading) {
                         Button {
                             route = .store
                         } label: {
