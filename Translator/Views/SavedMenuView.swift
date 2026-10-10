@@ -17,6 +17,7 @@ struct SavedMenuView: View {
     
     @State private var showEditSheet = false
     @State private var shouldDelete = false
+    @State private var showClean = false
     
     var body: some View {
         @Bindable var translator = translator
@@ -27,7 +28,7 @@ struct SavedMenuView: View {
             if let image = UIImage(data: menu.imageData) {
                 let (savedOCRData, savedMenuAI) = decodeMenu(menu)
                 
-                VStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 10) {
                     Button {
                         showEditSheet = true
                     } label: {
@@ -36,9 +37,9 @@ struct SavedMenuView: View {
                             .fontWeight(.bold)
                             .lineLimit(2)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(10)
                     }
                     .buttonStyle(.plain)
-                    .padding(10)
                     
                     HStack {
                         Image(systemName: "textformat.size").bold()
@@ -50,35 +51,58 @@ struct SavedMenuView: View {
                             .frame(width: 45, alignment: .trailing)
                     }
                     .padding(.horizontal)
-
-                    ZoomableImageView(
-                        image: image,
-                        items: savedOCRData?.items ?? [],
-                        menu: savedMenuAI,
-                        translations: savedOCRData?.translations ?? [:]
-                    )
-    
-                    if let menu = savedMenuAI {
-                        ScrollView {
-                            ForEach(menu.sections.indices, id: \.self) { sectionIndex in
-                                Divider()
-                                let section = menu.sections[sectionIndex]
-                                Text(section.title).font(.title2).bold()
-                                ForEach(section.items.indices, id: \.self) { itemIndex in
-                                    let item = section.items[itemIndex]
-                                    HStack {
-                                        Text(item.english)
-                                        Spacer()
-                                        Text(item.price ?? "")
-                                    }
-                                }
-                            }
-                        }
-                        .padding(10)
-                    }
                     
-                    Spacer()
+                    HStack {
+                        Spacer()
+                        Picker("", selection: $showClean) {
+                            Text("Original").tag(false)
+                            Text("Clean").tag(true)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(10)
+                        .frame(width: 200)
+                        Spacer()
+                    }
+                    .padding(.bottom, 10)
+                    
+                    if showClean {
+                        ZoomableImageView(
+                            image: UIImage(size: image.size),
+                            items: savedOCRData?.items ?? [],
+                            menu: savedMenuAI,
+                            translations: savedOCRData?.translations ?? [:]
+                        )
+                    } else {
+                        ZoomableImageView(
+                            image: image,
+                            items: savedOCRData?.items ?? [],
+                            menu: savedMenuAI,
+                            translations: savedOCRData?.translations ?? [:]
+                        )
+                    }
+
+                    //                    if let menu = savedMenuAI {
+                    //                        ScrollView {
+                    //                            ForEach(menu.sections.indices, id: \.self) { sectionIndex in
+                    //                                Divider()
+                    //                                let section = menu.sections[sectionIndex]
+                    //                                Text(section.title).font(.title2).bold()
+                    //                                ForEach(section.items.indices, id: \.self) { itemIndex in
+                    //                                    let item = section.items[itemIndex]
+                    //                                    HStack {
+                    //                                        Text(item.english)
+                    //                                        Spacer()
+                    //                                        Text(item.price ?? "")
+                    //                                    }
+                    //                                }
+                    //                            }
+                    //                        }
+                    //                        .padding(10)
+                    //                    }
+
                 }
+                .padding(.top, 60)
+                .frame(maxWidth: .infinity)
                 .toolbar {
                     ToolbarItem(placement: .automatic) {
                         Button {

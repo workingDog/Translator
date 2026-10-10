@@ -23,6 +23,7 @@ struct ZoomableImageView: View {
     @State private var isPinching = false
     
     var body: some View {
+
         ZStack {
             AppBackground().ignoresSafeArea()
             
@@ -35,6 +36,7 @@ struct ZoomableImageView: View {
                     Image(uiImage: image)
                         .resizable()
                         .frame(width: canvasSize.width, height: canvasSize.height)
+                    
                     ForEach(items) { item in
                         let theText = translations?[item.id] ?? translation(for: item) ?? item.text
                         
@@ -45,6 +47,7 @@ struct ZoomableImageView: View {
                             containerSize: canvasSize
                         )
                     }
+                    
                 }
                 .frame(width: canvasSize.width, height: canvasSize.height)
                 .scaleEffect(zoomScale, anchor: .topLeading)
@@ -52,7 +55,8 @@ struct ZoomableImageView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipped()
                 .contentShape(Rectangle())
-                .gesture(
+
+                .simultaneousGesture(
                     DragGesture()
                         .onChanged { value in
                             guard !isPinching else { return }
@@ -111,6 +115,7 @@ struct ZoomableImageView: View {
                         gestureStartOffset = .zero
                     }
                 }
+   
             }
             .frame(height: min(600, 800 * image.size.height / image.size.width))
         }
