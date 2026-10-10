@@ -106,12 +106,8 @@ struct EnglishView: View {
                 .padding(.bottom, 10)
             }
             
-            if showClean {
-                OCRImageBlankView()
-            } else {
-                OCRImageView()
-            }
-
+            OCRImageView(isClean: showClean)
+            
         }
         .task {
             translator.isProcessing = true

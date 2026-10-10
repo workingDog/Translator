@@ -7,29 +7,16 @@
 import SwiftUI
 
 
- struct OCRImageView: View {
-     @Environment(TranslatorModel.self) private var translator
- 
-     var body: some View {
-         if let image = translator.selectedImage {
-             ZoomableImageView(
-                 image: image,
-                 items: translator.ocrTextItems,
-                 menu: nil,
-                 translations: translator.translatedText
-             )
-         }
-     }
- 
- }
-
-struct OCRImageBlankView: View {
+struct OCRImageView: View {
     @Environment(TranslatorModel.self) private var translator
 
+    let isClean: Bool
+    
     var body: some View {
         if let image = translator.selectedImage {
+            let imagin  = isClean ? UIImage(size: image.size) : image
             ZoomableImageView(
-                image: UIImage(size: image.size),
+                image: imagin,
                 items: translator.ocrTextItems,
                 menu: nil,
                 translations: translator.translatedText

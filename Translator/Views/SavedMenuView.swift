@@ -65,22 +65,16 @@ struct SavedMenuView: View {
                     }
                     .padding(.bottom, 10)
                     
-                    if showClean {
-                        ZoomableImageView(
-                            image: UIImage(size: image.size),
-                            items: savedOCRData?.items ?? [],
-                            menu: savedMenuAI,
-                            translations: savedOCRData?.translations ?? [:]
-                        )
-                    } else {
-                        ZoomableImageView(
-                            image: image,
-                            items: savedOCRData?.items ?? [],
-                            menu: savedMenuAI,
-                            translations: savedOCRData?.translations ?? [:]
-                        )
-                    }
-
+                    let imagin = showClean ? UIImage(size: image.size) : image
+                    
+                    ZoomableImageView(
+                        image: imagin,
+                        items: savedOCRData?.items ?? [],
+                        menu: savedMenuAI,
+                        translations: savedOCRData?.translations ?? [:]
+                    )
+                    
+                    
                     //                    if let menu = savedMenuAI {
                     //                        ScrollView {
                     //                            ForEach(menu.sections.indices, id: \.self) { sectionIndex in
@@ -99,10 +93,10 @@ struct SavedMenuView: View {
                     //                        }
                     //                        .padding(10)
                     //                    }
-
+                    
                 }
-                .padding(.top, 60)
                 .frame(maxWidth: .infinity)
+                .navigationBarTitleDisplayMode(.large)
                 .toolbar {
                     ToolbarItem(placement: .automatic) {
                         Button {
