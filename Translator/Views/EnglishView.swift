@@ -20,24 +20,24 @@ struct EnglishView: View {
             HStack {
                 Image(systemName: "textformat.size").bold()
                 
-                Slider(value: $translator.fontScale, in: 0.5...1.8, step: 0.05).padding(15)
+                Slider(value: $translator.fontScale, in: 0.5...1.8, step: 0.05)
                 
                 Text("\(Int(translator.fontScale * 100))%")
                     .monospacedDigit()
                     .frame(width: 45, alignment: .trailing)
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 5)
             
             HStack {
                 Image(systemName: "distribute.vertical").bold()
                 
-                Slider(value: $translator.spacing, in: 1...250, step: 1.0).padding(15)
+                Slider(value: $translator.spacing, in: 1...250, step: 1.0)
                 
                 Text("\(Int(translator.spacing))")
                     .monospacedDigit()
                     .frame(width: 45, alignment: .trailing)
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 5)
             
             if translator.isProcessing {
                 HStack {

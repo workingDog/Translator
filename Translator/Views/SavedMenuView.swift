@@ -44,24 +44,23 @@ struct SavedMenuView: View {
                     HStack {
                         Image(systemName: "textformat.size").bold()
                         Slider(value: $translator.fontScale, in: 0.5...1.8, step: 0.05)
-                            .padding(15)
                             .frame(height: 50)
                         Text("\(Int(translator.fontScale * 100))%")
                             .monospacedDigit()
                             .frame(width: 45, alignment: .trailing)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 5)
                     
                     HStack {
                         Image(systemName: "distribute.vertical").bold()
                         
-                        Slider(value: $translator.spacing, in: 1...250, step: 1.0).padding(15)
+                        Slider(value: $translator.spacing, in: 1...250, step: 1.0)
                         
                         Text("\(Int(translator.spacing))")
                             .monospacedDigit()
                             .frame(width: 45, alignment: .trailing)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 5)
                     
                     HStack {
                         Spacer()
@@ -83,30 +82,9 @@ struct SavedMenuView: View {
                         items: savedOCRData?.items ?? [],
                         menu: savedMenuAI
                     )
-                    
-                    
-                    //                    if let menu = savedMenuAI {
-                    //                        ScrollView {
-                    //                            ForEach(menu.sections.indices, id: \.self) { sectionIndex in
-                    //                                Divider()
-                    //                                let section = menu.sections[sectionIndex]
-                    //                                Text(section.title).font(.title2).bold()
-                    //                                ForEach(section.items.indices, id: \.self) { itemIndex in
-                    //                                    let item = section.items[itemIndex]
-                    //                                    HStack {
-                    //                                        Text(item.english)
-                    //                                        Spacer()
-                    //                                        Text(item.price ?? "")
-                    //                                    }
-                    //                                }
-                    //                            }
-                    //                        }
-                    //                        .padding(10)
-                    //                    }
-                    
                 }
                 .frame(maxWidth: .infinity)
-                .navigationBarTitleDisplayMode(.large)
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .automatic) {
                         Button {

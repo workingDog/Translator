@@ -38,6 +38,7 @@ struct TranslationView: View {
 //                }
             }
             .padding(10)
+            .padding(.top, 10)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
