@@ -22,6 +22,7 @@ final class TranslatorModel {
     var isProcessing = false
     var errorMessage: String?
     var fontScale: Double = 1.0
+    var spacing: Double = 1.0
     var translationConfiguration: TranslationSession.Configuration?
     
     var ocrTextItems: [OCRTextItem] = []
@@ -70,28 +71,66 @@ final class TranslatorModel {
     
     @MainActor
     func renderTranslatedMenu() -> UIImage {
+        print("-----------> renderTranslatedMenu")
         guard let image = selectedImage else { return UIImage() }
         let renderer = UIGraphicsImageRenderer(size: image.size)
         
         return renderer.image { context in
             image.draw(in: CGRect(origin: .zero, size: image.size))
-            for item in ocrTextItems {
+            
+            for (index, item) in ocrTextItems.enumerated() {
                 guard !item.text.isEmpty else { continue }
+                
                 let box = CGRect(
                     x: item.boundingBox.minX * image.size.width,
-                    y: (1 - item.boundingBox.maxY) * image.size.height,
+                    y: (1 - item.boundingBox.maxY) * image.size.height + CGFloat(index) * 8,
                     width: item.boundingBox.width * image.size.width,
                     height: item.boundingBox.height * image.size.height
                 )
+                
                 let fontSize = max(box.height * 0.72 * fontScale, 8)
                 let font = UIFont.systemFont(ofSize: fontSize)
+                
                 let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: UIColor.label]
+                
                 UIColor.systemBackground.withAlphaComponent(0.92).setFill()
                 UIBezierPath(roundedRect: box.insetBy(dx: -4, dy: -2), cornerRadius: 3).fill()
+                
                 (item.text as NSString).draw(in: box.insetBy(dx: 4, dy: 2), withAttributes: attributes)
             }
+            
         }
     }
+    
+    /*
+     
+     @MainActor
+     func renderTranslatedMenu() -> UIImage {
+         guard let image = selectedImage else { return UIImage() }
+         let renderer = UIGraphicsImageRenderer(size: image.size)
+         
+         return renderer.image { context in
+             image.draw(in: CGRect(origin: .zero, size: image.size))
+             
+             for item in ocrTextItems {
+                 guard !item.text.isEmpty else { continue }
+                 let box = CGRect(
+                     x: item.boundingBox.minX * image.size.width,
+                     y: (1 - item.boundingBox.maxY) * image.size.height,
+                     width: item.boundingBox.width * image.size.width,
+                     height: item.boundingBox.height * image.size.height
+                 )
+                 let fontSize = max(box.height * 0.72 * fontScale, 8)
+                 let font = UIFont.systemFont(ofSize: fontSize)
+                 let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: UIColor.label]
+                 UIColor.systemBackground.withAlphaComponent(0.92).setFill()
+                 UIBezierPath(roundedRect: box.insetBy(dx: -4, dy: -2), cornerRadius: 3).fill()
+                 (item.text as NSString).draw(in: box.insetBy(dx: 4, dy: 2), withAttributes: attributes)
+             }
+             
+         }
+     }
+     */
     
     func translateOCRItems(using session: TranslationSession) async {
         var theItems: [OCRTextItem] = []

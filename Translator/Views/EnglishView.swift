@@ -28,6 +28,17 @@ struct EnglishView: View {
             }
             .padding(.horizontal)
             
+            HStack {
+                Image(systemName: "distribute.vertical").bold()
+                
+                Slider(value: $translator.spacing, in: 1...250, step: 1.0).padding(15)
+                
+                Text("\(Int(translator.spacing))")
+                    .monospacedDigit()
+                    .frame(width: 45, alignment: .trailing)
+            }
+            .padding(.horizontal)
+            
             if translator.isProcessing {
                 HStack {
                     Spacer()
@@ -50,7 +61,7 @@ struct EnglishView: View {
             }
             
             OCRImageView(isClean: showClean)
-            
+
         }
         .task {
             translator.isProcessing = true

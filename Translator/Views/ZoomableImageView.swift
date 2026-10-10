@@ -27,25 +27,50 @@ struct ZoomableImageView: View {
             AppBackground().ignoresSafeArea()
             
             GeometryReader { geometry in
+//                let baseWidth: CGFloat = 800
+//                let baseHeight = baseWidth * image.size.height / image.size.width
+//                let canvasSize = CGSize(width: baseWidth, height: baseHeight)
+
                 let baseWidth: CGFloat = 800
                 let baseHeight = baseWidth * image.size.height / image.size.width
-                let canvasSize = CGSize(width: baseWidth, height: baseHeight)
+                let extraHeight = CGFloat(max(0, items.count - 1)) * translator.spacing
+                let canvasSize = CGSize(width: baseWidth, height: baseHeight + extraHeight)
+                let imageSize = CGSize(width: baseWidth, height: baseHeight)
                 
-                ZStack {
+//                ZStack {
+//                    Image(uiImage: image)
+//                        .resizable()
+//                        .frame(width: canvasSize.width, height: canvasSize.height)
+//                    
+//                    ForEach(items) { item in
+//                        OCRTextOverlay(
+//                            item: item,
+//                            imageSize: image.size,
+//                            containerSize: canvasSize,
+//                            verticalOffset: (1 - item.boundingBox.midY) * translator.spacing
+//                        )
+//                    }
+//                    
+//                }
+                
+                ZStack(alignment: .top) {
                     Image(uiImage: image)
                         .resizable()
-                        .frame(width: canvasSize.width, height: canvasSize.height)
-                    
+                        .frame(width: imageSize.width, height: imageSize.height)
+
                     ForEach(items) { item in
                         OCRTextOverlay(
                             item: item,
                             imageSize: image.size,
-                            containerSize: canvasSize
+                            containerSize: imageSize,
+                            verticalOffset: (1 - item.boundingBox.midY) * translator.spacing
                         )
                     }
-                    
                 }
-                .frame(width: canvasSize.width, height: canvasSize.height)
+
+                .frame(width: canvasSize.width, height: canvasSize.height, alignment: .top)
+                
+     //           .frame(width: canvasSize.width, height: canvasSize.height)
                 .scaleEffect(zoomScale, anchor: .topLeading)
                 .offset(panOffset)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

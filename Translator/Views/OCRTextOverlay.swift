@@ -13,6 +13,7 @@ struct OCRTextOverlay: View {
     let item: OCRTextItem
     let imageSize: CGSize
     let containerSize: CGSize
+    let verticalOffset: CGFloat
 
     private var scale: CGFloat {
         min(containerSize.width / imageSize.width, containerSize.height / imageSize.height)
@@ -61,7 +62,7 @@ struct OCRTextOverlay: View {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(.background.opacity(0.92))
             }
-            .position(x: x, y: y)
+            .position(x: x, y: y + verticalOffset)
     }
 }
 

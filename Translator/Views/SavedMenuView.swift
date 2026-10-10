@@ -53,6 +53,17 @@ struct SavedMenuView: View {
                     .padding(.horizontal)
                     
                     HStack {
+                        Image(systemName: "distribute.vertical").bold()
+                        
+                        Slider(value: $translator.spacing, in: 1...250, step: 1.0).padding(15)
+                        
+                        Text("\(Int(translator.spacing))")
+                            .monospacedDigit()
+                            .frame(width: 45, alignment: .trailing)
+                    }
+                    .padding(.horizontal)
+                    
+                    HStack {
                         Spacer()
                         Picker("", selection: $showClean) {
                             Text("Overlay").tag(false)
