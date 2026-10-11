@@ -43,39 +43,34 @@ struct SavedMenuView: View {
                         }
                         .buttonStyle(.plain)
                         
-                        HStack {
-                            Image(systemName: "textformat.size").bold()
-                            Slider(value: $translator.fontScale, in: 0.5...1.8, step: 0.05)
-                                .frame(height: 50)
-                            Text("\(Int(translator.fontScale * 100))%")
-                                .monospacedDigit()
-                                .frame(width: 45, alignment: .trailing)
-                        }
-                        .padding(.horizontal, 5)
-                        
-                        HStack {
-                            Image(systemName: "distribute.vertical").bold()
+                        VStack(spacing: 15) {
+                            HStack(spacing: 12) {
+                                Image(systemName: "textformat.size").bold()
+                                Slider(value: $translator.fontScale, in: 0.5...1.8, step: 0.05)
+                                Text("\(Int(translator.fontScale * 100))")
+                                    .monospacedDigit()
+                                    .frame(width: 50, alignment: .trailing)
+                            }.padding(5)
                             
-                            Slider(value: $translator.spacing, in: 1...250, step: 1.0)
+                            HStack(spacing: 12) {
+                                Image(systemName: "distribute.vertical").bold()
+                                Slider(value: $translator.spacing, in: 0...250, step: 1)
+                                Text("\(Int(translator.spacing))")
+                                    .monospacedDigit()
+                                    .frame(width: 50, alignment: .trailing)
+                            }.padding(5)
                             
-                            Text("\(Int(translator.spacing))")
-                                .monospacedDigit()
-                                .frame(width: 45, alignment: .trailing)
-                        }
-                        .padding(.horizontal, 5)
-                        
-                        HStack {
-                            Spacer()
-                            Picker("", selection: $showClean) {
+                            Picker("Image style", selection: $showClean) {
                                 Text("Overlay").tag(false)
                                 Text("Transparent").tag(true)
                             }
                             .pickerStyle(.segmented)
-                            .padding(10)
-                            .frame(width: 200)
-                            Spacer()
+                            .frame(width: 222)
+                            .padding(.bottom, 5)
+                            
                         }
-                        .padding(.bottom, 10)
+                        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 16))
+                        .padding(.bottom, 5)
                         
                         let imagin = showClean ? UIImage(size: image.size) : image
                         
@@ -87,6 +82,7 @@ struct SavedMenuView: View {
                         
                         Spacer()
                     }
+                    .padding(5)
                     .frame(maxWidth: .infinity)
                 }
                 .toolbar {

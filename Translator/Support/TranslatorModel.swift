@@ -22,7 +22,7 @@ final class TranslatorModel {
     var isProcessing = false
     var errorMessage: String?
     var fontScale: Double = 1.0
-    var spacing: Double = 1.0
+    var spacing: Double = 0.0
     var translationConfiguration: TranslationSession.Configuration?
     
     var ocrTextItems: [OCRTextItem] = []
