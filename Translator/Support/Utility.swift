@@ -18,12 +18,31 @@ import CoreImage.CIFilterBuiltins
 
 struct ImageItem: Identifiable, Hashable {
     let id = UUID()
-    var uimage: UIImage
     
+    var uimage: UIImage
+    var corectedImg: UIImage
+    
+    var isCorrected = false {
+        didSet {
+            guard isCorrected, !oldValue else { return }
+            corectedImg = MenuPerspectiveCorrection.correct(uimage) ?? UIImage()
+        }
+    }
+    
+    init(uimage: UIImage, corectedImg: UIImage = UIImage()) {
+        self.uimage = uimage
+        self.corectedImg = corectedImg
+    }
+
     var imgData: Data? {
+        if isCorrected {
+            let resized = corectedImg.resizedToFitWidth(1280)
+            return resized.jpegData(compressionQuality: 0.9)
+        }
         let resized = uimage.resizedToFitWidth(1280)
         return resized.jpegData(compressionQuality: 0.9)
     }
+
 }
 
 extension String {
