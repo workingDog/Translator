@@ -16,7 +16,7 @@ struct EnglishView: View {
     var body: some View {
         @Bindable var translator = translator
         
-        ScrollView {
+        GeometryReader { geometry in
             
             VStack(alignment: .leading, spacing: 10) {
                 

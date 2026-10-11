@@ -28,7 +28,7 @@ struct SavedMenuView: View {
             if let image = UIImage(data: menu.imageData) {
                 let (savedOCRData, savedMenuAI) = decodeMenu(menu)
                 
-                ScrollView {
+                GeometryReader { geometry in
                     VStack(alignment: .leading, spacing: 10) {
                         
                         Button {
@@ -79,11 +79,14 @@ struct SavedMenuView: View {
                             items: savedOCRData?.items ?? [],
                             menu: savedMenuAI
                         )
-                        
-                        Spacer()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .zIndex(0)
+                        .clipped()
+                        .ignoresSafeArea(.container, edges: .bottom)
+
                     }
-                    .padding(5)
-                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 5)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 }
                 .toolbar {
                     ToolbarItem(placement: .automatic) {

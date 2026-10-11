@@ -142,6 +142,7 @@ struct ContentView: View {
                     .clipped()
                     .contentShape(Rectangle())
                     .onTapGesture {
+                        translator.resetTranslation()
                         translator.selectedImage = imgItem.uimage
                         route = .translation
                     }

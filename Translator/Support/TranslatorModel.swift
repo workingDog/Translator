@@ -31,6 +31,18 @@ final class TranslatorModel {
     
     @ObservationIgnored var ocrService = OCRService()
     
+    
+    init() { }
+    
+    func resetTranslation() {
+        japaneseText = ""
+        englishText = ""
+        ocrTextItems = []
+        errorMessage = nil
+        isProcessing = false
+        translationConfiguration = nil
+    }
+    
     func doRecognition() async {
         if let img = selectedImage {
             await process(image: img)
