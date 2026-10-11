@@ -129,7 +129,7 @@ struct ContentView: View {
             if let uimg = UIImage(named: "testmenu") {
                 selectedImages.append(ImageItem(uimage: uimg))
             }
-            if let uimg = UIImage(named: "testSkew") {  // test5
+            if let uimg = UIImage(named: "testSkew") {  // test5 testSkew
                 testImg = ImageItem(uimage: uimg)
                 selectedImages.append(testImg!)
             }
