@@ -202,8 +202,6 @@ struct ContentView: View {
                 throw PhotoError.invalidData
             }
             selectedImages.append(ImageItem(uimage: image))
-            translator.selectedImage = image
-            await translator.doRecognition()
         } catch {
             translator.errorMessage = error.localizedDescription
         }
