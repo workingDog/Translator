@@ -4,7 +4,15 @@
 //
 //  Created by Ringo Wathelet on 2026/10/05.
 //
+import Foundation
 import SwiftUI
+import Vision
+import CoreImage
+import UIKit
+
+import CoreGraphics
+import CoreImage.CIFilterBuiltins
+
 
 
 
@@ -51,15 +59,15 @@ extension UIImage {
     
     var cgImagePropertyOrientation: CGImagePropertyOrientation {
         switch imageOrientation {
-            case .up: .up
-            case .down: .down
-            case .left: .left
-            case .right: .right
-            case .upMirrored: .upMirrored
-            case .downMirrored: .downMirrored
-            case .leftMirrored: .leftMirrored
-            case .rightMirrored: .rightMirrored
-            @unknown default: .up
+        case .up: .up
+        case .down: .down
+        case .left: .left
+        case .right: .right
+        case .upMirrored: .upMirrored
+        case .downMirrored: .downMirrored
+        case .leftMirrored: .leftMirrored
+        case .rightMirrored: .rightMirrored
+        @unknown default: .up
         }
     }
     
@@ -91,7 +99,6 @@ extension UIImage {
             draw(in: CGRect(origin: .zero, size: newSize))
         }
     }
-
     
 }
 

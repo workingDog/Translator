@@ -36,8 +36,10 @@ struct ContentView: View {
     @State private var showCamera = false
     @State private var showSmart = false
     @State private var showImport = false
+    @State private var showCorrection = false
     @State private var cameraCancel = false
 
+    @State private var testImg: ImageItem?
     
     var body: some View {
         NavigationStack {
@@ -97,6 +99,13 @@ struct ContentView: View {
                             Image(systemName: "list.number").font(.title2)
                         }
                     }
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showCorrection.toggle()
+                        } label: {
+                            Image(systemName: "skew").font(.title2)
+                        }
+                    }
                 }
             }
         }
@@ -120,6 +129,10 @@ struct ContentView: View {
             if let uimg = UIImage(named: "testmenu") {
                 selectedImages.append(ImageItem(uimage: uimg))
             }
+            if let uimg = UIImage(named: "testSkew") {  // test5
+                testImg = ImageItem(uimage: uimg)
+                selectedImages.append(testImg!)
+            }
         }
         .task(id: selectedPhoto) {
             await loadSelectedPhoto()
@@ -131,28 +144,73 @@ struct ContentView: View {
     
     @ViewBuilder
     var selectedImagesView: some View {
+        
+        /*
         List {
             ForEach(selectedImages) { imgItem in
-                Image(uiImage: imgItem.uimage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 333, height: 333)
-                    .scaledToFit()
-                    .clipShape(RoundedRectangle(cornerRadius: 15))
-                    .clipped()
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        translator.resetTranslation()
-                        translator.selectedImage = imgItem.uimage
-                        route = .translation
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 4, leading: 1, bottom: 4, trailing: 1))
+                ZStack {
+                    Image(uiImage: imgItem.uimage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 333, height: 333)
+                        .scaledToFit()
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                        .clipped()
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            translator.resetTranslation()
+                            translator.selectedImage = imgItem.uimage
+                            route = .translation
+                        }
+                }
             }
             .onDelete(perform: deleteImage)
         }
+        */
+        
+        List {
+            ForEach(selectedImages) { imgItem in
+                ZStack {
+                    Image(uiImage: imgItem.uimage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 333, height: 333)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                        .clipped()
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            translator.resetTranslation()
+                            translator.selectedImage = imgItem.uimage
+                            route = .translation
+                        }
+                    
+                    if showCorrection, let testImg, testImg.id == imgItem.id {
+                        if let correctedImage = correctImage(imgItem.uimage) {
+                            Image(uiImage: correctedImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 333, height: 333)
+                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                .clipped()
+                                .allowsHitTesting(false)
+                        } else {
+                            Text("Rectangle not detected").foregroundStyle(.red)
+                        }
+                    }
+                    
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 4, leading: 1, bottom: 4, trailing: 1))
+            }
+            .onDelete(perform: deleteImage)
+        }
+        
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+    }
+
+    private func correctImage(_ uiImage: UIImage) -> UIImage? {
+        MenuPerspectiveCorrection.correct(uiImage)
     }
     
     private func deleteImage(at offsets: IndexSet) {
