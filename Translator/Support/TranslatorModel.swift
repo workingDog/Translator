@@ -20,6 +20,7 @@ final class TranslatorModel {
     var japaneseText = ""
     var englishText = ""
     var isProcessing = false
+    var showPerspective = true
     var errorMessage: String?
     var fontScale: Double = 1.0
     var spacing: Double = 0.0

@@ -36,21 +36,18 @@ struct ContentView: View {
     @State private var showCamera = false
     @State private var showSmart = false
     @State private var showImport = false
-    @State private var showCorrection = false
+    @State private var showSettings = false
     @State private var cameraCancel = false
-
+    
     
     var body: some View {
         NavigationStack {
             ZStack {
                 AppBackground().ignoresSafeArea()
                 
-                VStack(spacing: 12) {
-                    
+                VStack(spacing: 10) {
                     Text("Translator")
                         .font(.system(size: 28, weight: .bold))
-                        .padding(.horizontal, 10)
-                        .padding(.top, -30)
                     
                     selectedImagesView
                     
@@ -58,7 +55,6 @@ struct ContentView: View {
                         Text(errorMessage).foregroundStyle(.red)
                     }
                 }
-                .padding()
                 .navigationDestination(item: $route) { route in
                     if route == .store {
                         SavedTranslationView()
@@ -89,6 +85,13 @@ struct ContentView: View {
                             showImport = true
                         } label: {
                             Image(systemName: "tray.and.arrow.down")
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showSettings.toggle()
+                        } label: {
+                            Image(systemName: "gear")
                         }
                     }
                     ToolbarItem(placement: .topBarLeading) {
@@ -131,33 +134,40 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showCamera) {
             CameraView(selectedImages: $selectedImages, cameraCancel: $cameraCancel)
         }
+        .sheet(isPresented: $showSettings) {
+            SettingsView().environment(translator)
+        }
     }
     
     @ViewBuilder
     var selectedImagesView: some View {
         List {
             ForEach(Array(selectedImages.enumerated()), id: \.element.id) { index, imgItem in
+                
                 HStack {
-                    Button {
-                        selectedImages[index].isCorrected.toggle()
-                    } label: {
-                        Image(systemName: "perspective").font(.title)
-                            .foregroundStyle(imgItem.isCorrected ? Color.red : Color.primary)
-                            .padding(8)
-                            .overlay {
-                                if imgItem.isCorrected {
-                                    Circle().stroke(Color.red, lineWidth: 1.5)
+                    
+                    if translator.showPerspective {
+                        Button {
+                            selectedImages[index].isCorrected.toggle()
+                        } label: {
+                            Image(systemName: "perspective")
+                                .font(.title)
+                                .foregroundStyle(imgItem.isCorrected ? Color.red : Color.primary)
+                                .overlay {
+                                    if imgItem.isCorrected {
+                                        Circle().stroke(Color.red, lineWidth: 1.5)
+                                    }
                                 }
-                            }
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                     
                     let theImg = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
-
+                    
                     Image(uiImage: theImg)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 333, height: 333)
+                        .frame(width: 330, height: 280)
                         .clipShape(RoundedRectangle(cornerRadius: 15))
                         .clipped()
                         .contentShape(Rectangle())
@@ -166,17 +176,18 @@ struct ContentView: View {
                             translator.selectedImage = theImg
                             route = .translation
                         }
-                        .padding(.horizontal, 10)
-                    
-                    Spacer()
+                        .padding(5)
                 }
+                .listRowInsets(EdgeInsets(top: 2.5,leading: 0,bottom: 2.5,trailing: 0))
             }
             .onDelete(perform: deleteImage)
+            .listRowBackground(Color.clear)
+ //           .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
     }
-  
+    
     private func deleteImage(at offsets: IndexSet) {
         selectedImages.remove(atOffsets: offsets)
     }
@@ -237,102 +248,102 @@ struct ContentView: View {
 
 
 /*
-List {
-    ForEach(selectedImages) { imgItem in
-        ZStack {
-            Image(uiImage: imgItem.uimage)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 333, height: 333)
-                .clipShape(RoundedRectangle(cornerRadius: 15))
-                .clipped()
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    translator.resetTranslation()
-                    translator.selectedImage = imgItem.uimage
-                    route = .translation
-                }
-            
-            if showCorrection, let testImg, testImg.id == imgItem.id {
-                if let correctedImage = correctImage(imgItem.uimage) {
-                    // set the new image to this correct image
-                    Image(uiImage: correctedImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 333, height: 333)
-                        .clipShape(RoundedRectangle(cornerRadius: 15))
-                        .clipped()
-                        .allowsHitTesting(false)
-
-                } else {
-                    Text("Rectangle not detected").foregroundStyle(.red)
-                }
-            } else {
-                // undo the corrected image
-               
-                
-            }
-            
-        }
-        .listRowBackground(Color.clear)
-        .listRowInsets(EdgeInsets(top: 4, leading: 1, bottom: 4, trailing: 1))
-    }
-    .onDelete(perform: deleteImage)
-}
+ List {
+ ForEach(selectedImages) { imgItem in
+ ZStack {
+ Image(uiImage: imgItem.uimage)
+ .resizable()
+ .aspectRatio(contentMode: .fit)
+ .frame(width: 333, height: 333)
+ .clipShape(RoundedRectangle(cornerRadius: 15))
+ .clipped()
+ .contentShape(Rectangle())
+ .onTapGesture {
+ translator.resetTranslation()
+ translator.selectedImage = imgItem.uimage
+ route = .translation
+ }
+ 
+ if showCorrection, let testImg, testImg.id == imgItem.id {
+ if let correctedImage = correctImage(imgItem.uimage) {
+ // set the new image to this correct image
+ Image(uiImage: correctedImage)
+ .resizable()
+ .aspectRatio(contentMode: .fit)
+ .frame(width: 333, height: 333)
+ .clipShape(RoundedRectangle(cornerRadius: 15))
+ .clipped()
+ .allowsHitTesting(false)
+ 
+ } else {
+ Text("Rectangle not detected").foregroundStyle(.red)
+ }
+ } else {
+ // undo the corrected image
  
  
-//
-//    @ViewBuilder
-//    var selectedImagesView: some View {
-//
-//        List {
-//            ForEach(selectedImages) { imgItem in
-//                HStack {
-//
-//                    Button {
-//                        if let index = selectedImages.firstIndex(where: {$0.id == imgItem.id}) {
-//                            selectedImages[index].isCorrected.toggle()
-//                        }
-//                    } label: {
-//                        Image(systemName: selectedImages.contains(where: {$0.id == imgItem.id})
-//                              ? "checkmark.circle.fill"
-//                              : "circle")
-//                        .font(.title2)
-//                        .foregroundStyle(selectedImages.contains(where: {$0.id == imgItem.id})
-//                                         ? Color.green
-//                                         : .secondary
-//                        )
-//
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                        .contentShape(Rectangle())
-//                    }
-//                    .buttonStyle(.plain)
-//
-//                    Image(uiImage: imgItem.uimage)
-//                        .resizable()
-//                        .aspectRatio(contentMode: .fit)
-//                        .frame(width: 333, height: 333)
-//                        .scaledToFit()
-//                        .clipShape(RoundedRectangle(cornerRadius: 15))
-//                        .clipped()
-//                        .contentShape(Rectangle())
-//                        .onTapGesture {
-//                            print("---> selected")
-////                            translator.resetTranslation()
-////                            translator.selectedImage = imgItem.uimage
-////                            route = .translation
-//                        }
-//
-//                    Spacer()
-//                }
-//            }
-//            .onDelete(perform: deleteImage)
-//        }
-//
-//        .listStyle(.plain)
-//        .scrollContentBackground(.hidden)
-//    }
-
+ }
+ 
+ }
+ .listRowBackground(Color.clear)
+ .listRowInsets(EdgeInsets(top: 4, leading: 1, bottom: 4, trailing: 1))
+ }
+ .onDelete(perform: deleteImage)
+ }
+ 
+ 
+ //
+ //    @ViewBuilder
+ //    var selectedImagesView: some View {
+ //
+ //        List {
+ //            ForEach(selectedImages) { imgItem in
+ //                HStack {
+ //
+ //                    Button {
+ //                        if let index = selectedImages.firstIndex(where: {$0.id == imgItem.id}) {
+ //                            selectedImages[index].isCorrected.toggle()
+ //                        }
+ //                    } label: {
+ //                        Image(systemName: selectedImages.contains(where: {$0.id == imgItem.id})
+ //                              ? "checkmark.circle.fill"
+ //                              : "circle")
+ //                        .font(.title2)
+ //                        .foregroundStyle(selectedImages.contains(where: {$0.id == imgItem.id})
+ //                                         ? Color.green
+ //                                         : .secondary
+ //                        )
+ //
+ //                        .frame(maxWidth: .infinity, alignment: .leading)
+ //                        .contentShape(Rectangle())
+ //                    }
+ //                    .buttonStyle(.plain)
+ //
+ //                    Image(uiImage: imgItem.uimage)
+ //                        .resizable()
+ //                        .aspectRatio(contentMode: .fit)
+ //                        .frame(width: 333, height: 333)
+ //                        .scaledToFit()
+ //                        .clipShape(RoundedRectangle(cornerRadius: 15))
+ //                        .clipped()
+ //                        .contentShape(Rectangle())
+ //                        .onTapGesture {
+ //                            print("---> selected")
+ ////                            translator.resetTranslation()
+ ////                            translator.selectedImage = imgItem.uimage
+ ////                            route = .translation
+ //                        }
+ //
+ //                    Spacer()
+ //                }
+ //            }
+ //            .onDelete(perform: deleteImage)
+ //        }
+ //
+ //        .listStyle(.plain)
+ //        .scrollContentBackground(.hidden)
+ //    }
+ 
  
  */
 
