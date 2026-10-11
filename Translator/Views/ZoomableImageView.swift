@@ -28,8 +28,12 @@ struct ZoomableImageView: View {
             
             GeometryReader { geometry in
                 
-                let baseWidth: CGFloat = 1600
-                let baseHeight = baseWidth * image.size.height / image.size.width
+                let baseWidth = image.size.width * 2
+                let baseHeight = image.size.height * 2
+ 
+//                let baseWidth: CGFloat = 1600
+//                let baseHeight = baseWidth * image.size.height / image.size.width
+               
                 let extraHeight = CGFloat(max(0, items.count - 1)) * translator.spacing
                 let canvasSize = CGSize(width: baseWidth, height: baseHeight + extraHeight)
                 let imageSize = CGSize(width: baseWidth, height: baseHeight)
@@ -49,13 +53,18 @@ struct ZoomableImageView: View {
                     }
                 }
                 
+                //                .frame(width: canvasSize.width, height: canvasSize.height, alignment: .top)
+                //                .scaleEffect(zoomScale, anchor: .topLeading)
+                //                .offset(panOffset)
+                //                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                //                .contentShape(Rectangle())
+                
                 .frame(width: canvasSize.width, height: canvasSize.height, alignment: .top)
                 .scaleEffect(zoomScale, anchor: .topLeading)
                 .offset(panOffset)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipped()
-                .contentShape(Rectangle())
-                
+
                 .simultaneousGesture(
                     DragGesture()
                         .onChanged { value in
@@ -117,7 +126,6 @@ struct ZoomableImageView: View {
                 }
                 
             }
-            .frame(height: min(800, 1600 * image.size.height / image.size.width))
         }
     }
     
