@@ -9,7 +9,6 @@ import SwiftUI
 import Vision
 import CoreImage
 import UIKit
-import Accelerate
 import CoreGraphics
 import CoreImage.CIFilterBuiltins
 
@@ -88,15 +87,15 @@ extension UIImage {
     
     var cgImagePropertyOrientation: CGImagePropertyOrientation {
         switch imageOrientation {
-        case .up: .up
-        case .down: .down
-        case .left: .left
-        case .right: .right
-        case .upMirrored: .upMirrored
-        case .downMirrored: .downMirrored
-        case .leftMirrored: .leftMirrored
-        case .rightMirrored: .rightMirrored
-        @unknown default: .up
+            case .up: .up
+            case .down: .down
+            case .left: .left
+            case .right: .right
+            case .upMirrored: .upMirrored
+            case .downMirrored: .downMirrored
+            case .leftMirrored: .leftMirrored
+            case .rightMirrored: .rightMirrored
+            @unknown default: .up
         }
     }
     
@@ -128,19 +127,6 @@ extension UIImage {
             draw(in: CGRect(origin: .zero, size: newSize))
         }
     }
-    
-    func normalizedOrientation() -> UIImage {
-        guard imageOrientation != .up else { return self }
-
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = scale
-        format.opaque = false
-
-        let renderer = UIGraphicsImageRenderer(size: size, format: format)
-        return renderer.image { _ in
-            draw(in: CGRect(origin: .zero, size: size))
-        }
-    }
 
     func rotated(by degrees: CGFloat) -> UIImage {
         let radians = degrees * .pi / 180
@@ -157,51 +143,7 @@ extension UIImage {
             draw(in: CGRect(x: -size.width / 2, y: -size.height / 2, width: size.width, height: size.height))
         }
     }
-    
-    func rotated2(by degrees: Int) -> UIImage {
-        let angle = ((degrees % 360) + 360) % 360
-        guard let cgImage, [90, 180, 270].contains(angle) else { return self }
-        
-        var format = vImage_CGImageFormat(
-            bitsPerComponent: 8,
-            bitsPerPixel: 32,
-            colorSpace: Unmanaged.passRetained(CGColorSpaceCreateDeviceRGB()),
-            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.first.rawValue),
-            version: 0,
-            decode: nil,
-            renderingIntent: .defaultIntent
-        )
-        var source = vImage_Buffer()
-        guard vImageBuffer_InitWithCGImage(&source, &format, nil, cgImage, vImage_Flags(kvImageNoFlags)) == kvImageNoError else { return self }
 
-        defer { free(source.data) }
-
-        var destination = vImage_Buffer()
-
-        var background: UInt8 = 0
-
-        let rotation: UInt8 = angle == 90 ? UInt8(kRotate90DegreesClockwise) : angle == 180 ? UInt8(kRotate180DegreesClockwise) : UInt8(kRotate270DegreesClockwise)
-
-        guard vImageRotate90_ARGB8888(&source, &destination, rotation, &background, vImage_Flags(kvImageNoFlags)) == kvImageNoError else { return self }
-
-        defer { free(destination.data) }
-
-        guard let output = vImageCreateCGImageFromBuffer(&destination, &format, nil, nil, vImage_Flags(kvImageNoFlags), nil)?.takeRetainedValue() else { return self }
-
-        return UIImage(cgImage: output, scale: scale, orientation: .up)
-
-    }
-
-    private func normalizedCGImage() -> CGImage? {
-        guard imageOrientation != .up else { return cgImage }
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = scale
-        let renderer = UIGraphicsImageRenderer(size: size, format: format)
-        return renderer.image { _ in
-            draw(in: CGRect(origin: .zero, size: size))
-        }.cgImage
-    }
- 
 }
 
 extension Array where Element == OCRTextItem {
