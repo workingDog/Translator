@@ -30,9 +30,8 @@ struct SettingsView: View {
                     }
                 }
                 HStack {
-                    Text("Correction buttons")
-                        .font(.title2)
-                        .padding(20)
+                    Text("Correction").font(.title2)
+                    Image(systemName: "perspective").font(.title).padding(20)
                     Toggle("", isOn: $translator.showPerspective).fixedSize()
                     Spacer()
                 }

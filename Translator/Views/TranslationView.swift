@@ -42,14 +42,22 @@ struct TranslationView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Save") {
+                Button {
                     if !isSaved {
                         translator.saveTranslatedMenu(
                             title: "Restaurant Menu",
                             modelContext: modelContext)
                         isSaved = true
                     }
-                }.disabled(isSaved)
+                } label: {
+                    ZStack {
+                        Image(systemName: "star.fill").foregroundStyle(.yellow)
+                        Image(systemName: "star").foregroundStyle(.black)
+                    }
+                    .font(.title2)
+                }
+                .buttonStyle(.plain)
+                .disabled(isSaved)
             }
             
 //            ToolbarItemGroup(placement: .topBarTrailing) {
