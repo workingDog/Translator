@@ -19,13 +19,15 @@ struct SettingsView: View {
             AppBackground().ignoresSafeArea()
             
             VStack (alignment: .leading, spacing: 20) {
-                HStack {
-                    Button("Done") {
-                        dismiss()
-                    }.buttonStyle(.glass)
-                    Spacer()
-                    Text("Settings").font(.title).bold()
-                    Spacer()
+                if ProcessInfo.processInfo.isiOSAppOnMac {
+                    HStack {
+                        Button("Done") {
+                            dismiss()
+                        }.buttonStyle(.glass)
+                        Spacer()
+                        Text("Settings").font(.title).bold()
+                        Spacer()
+                    }
                 }
                 HStack {
                     Text("Correction buttons")

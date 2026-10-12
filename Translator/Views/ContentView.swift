@@ -136,6 +136,7 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView().environment(translator)
+                .presentationDetents([.medium])
         }
     }
     
