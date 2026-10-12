@@ -21,6 +21,7 @@ final class TranslatorModel {
     var englishText = ""
     var isProcessing = false
     var showPerspective = true
+    var showRotation = true
     var errorMessage: String?
     var fontScale: Double = 1.0
     var spacing: Double = 0.0

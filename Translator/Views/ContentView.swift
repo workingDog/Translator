@@ -151,21 +151,32 @@ struct ContentView: View {
             ForEach(Array(selectedImages.enumerated()), id: \.element.id) { index, imgItem in
                 
                 HStack {
-                    
-                    if translator.showPerspective {
-                        Button {
-                            selectedImages[index].isCorrected.toggle()
-                        } label: {
-                            Image(systemName: "perspective")
-                                .font(.title)
-                                .foregroundStyle(imgItem.isCorrected ? Color.red : Color.primary)
-                                .overlay {
-                                    if imgItem.isCorrected {
-                                        Circle().stroke(Color.red, lineWidth: 1.5)
+
+                    VStack(spacing: 20) {
+                        if translator.showPerspective {
+                            Button {
+                                selectedImages[index].isCorrected.toggle()
+                            } label: {
+                                Image(systemName: "perspective")
+                                    .font(.title2)
+                                    .foregroundStyle(imgItem.isCorrected ? Color.red : Color.primary)
+                                    .overlay {
+                                        if imgItem.isCorrected {
+                                            Circle().stroke(Color.red, lineWidth: 1.5)
+                                        }
                                     }
-                                }
+                            }
+                            .buttonStyle(.glass)
                         }
-                        .buttonStyle(.plain)
+                        
+                        if translator.showRotation {
+                            Button {
+                                selectedImages[index].isRotated.toggle()
+                            } label: {
+                                Image(systemName: "rotate.right").font(.title2)
+                            }
+                            .buttonStyle(.glass)
+                        }
                     }
                     
                     let theImg = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
@@ -188,7 +199,6 @@ struct ContentView: View {
             }
             .onDelete(perform: deleteImage)
             .listRowBackground(Color.clear)
- //           .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
@@ -247,110 +257,3 @@ struct ContentView: View {
     }
     
 }
-
-
-
-
-
-
-/*
- List {
- ForEach(selectedImages) { imgItem in
- ZStack {
- Image(uiImage: imgItem.uimage)
- .resizable()
- .aspectRatio(contentMode: .fit)
- .frame(width: 333, height: 333)
- .clipShape(RoundedRectangle(cornerRadius: 15))
- .clipped()
- .contentShape(Rectangle())
- .onTapGesture {
- translator.resetTranslation()
- translator.selectedImage = imgItem.uimage
- route = .translation
- }
- 
- if showCorrection, let testImg, testImg.id == imgItem.id {
- if let correctedImage = correctImage(imgItem.uimage) {
- // set the new image to this correct image
- Image(uiImage: correctedImage)
- .resizable()
- .aspectRatio(contentMode: .fit)
- .frame(width: 333, height: 333)
- .clipShape(RoundedRectangle(cornerRadius: 15))
- .clipped()
- .allowsHitTesting(false)
- 
- } else {
- Text("Rectangle not detected").foregroundStyle(.red)
- }
- } else {
- // undo the corrected image
- 
- 
- }
- 
- }
- .listRowBackground(Color.clear)
- .listRowInsets(EdgeInsets(top: 4, leading: 1, bottom: 4, trailing: 1))
- }
- .onDelete(perform: deleteImage)
- }
- 
- 
- //
- //    @ViewBuilder
- //    var selectedImagesView: some View {
- //
- //        List {
- //            ForEach(selectedImages) { imgItem in
- //                HStack {
- //
- //                    Button {
- //                        if let index = selectedImages.firstIndex(where: {$0.id == imgItem.id}) {
- //                            selectedImages[index].isCorrected.toggle()
- //                        }
- //                    } label: {
- //                        Image(systemName: selectedImages.contains(where: {$0.id == imgItem.id})
- //                              ? "checkmark.circle.fill"
- //                              : "circle")
- //                        .font(.title2)
- //                        .foregroundStyle(selectedImages.contains(where: {$0.id == imgItem.id})
- //                                         ? Color.green
- //                                         : .secondary
- //                        )
- //
- //                        .frame(maxWidth: .infinity, alignment: .leading)
- //                        .contentShape(Rectangle())
- //                    }
- //                    .buttonStyle(.plain)
- //
- //                    Image(uiImage: imgItem.uimage)
- //                        .resizable()
- //                        .aspectRatio(contentMode: .fit)
- //                        .frame(width: 333, height: 333)
- //                        .scaledToFit()
- //                        .clipShape(RoundedRectangle(cornerRadius: 15))
- //                        .clipped()
- //                        .contentShape(Rectangle())
- //                        .onTapGesture {
- //                            print("---> selected")
- ////                            translator.resetTranslation()
- ////                            translator.selectedImage = imgItem.uimage
- ////                            route = .translation
- //                        }
- //
- //                    Spacer()
- //                }
- //            }
- //            .onDelete(perform: deleteImage)
- //        }
- //
- //        .listStyle(.plain)
- //        .scrollContentBackground(.hidden)
- //    }
- 
- 
- */
-
-

@@ -37,6 +37,13 @@ struct SettingsView: View {
                 }
                 .padding(.top, 40)
                 
+                HStack {
+                    Text("Rotation").font(.title2)
+                    Image(systemName: "rotate.right").font(.title).padding(20)
+                    Toggle("", isOn: $translator.showRotation).fixedSize()
+                    Spacer()
+                }
+                
                 Spacer()
             }
             .padding(10)

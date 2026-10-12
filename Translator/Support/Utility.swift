@@ -9,10 +9,9 @@ import SwiftUI
 import Vision
 import CoreImage
 import UIKit
-
+import Accelerate
 import CoreGraphics
 import CoreImage.CIFilterBuiltins
-
 
 
 
@@ -26,6 +25,17 @@ struct ImageItem: Identifiable, Hashable {
         didSet {
             guard isCorrected, !oldValue else { return }
             corectedImg = MenuPerspectiveCorrection.correct(uimage) ?? UIImage()
+        }
+    }
+
+    var isRotated = false {
+        didSet {
+            guard isRotated != oldValue else { return }
+            if isCorrected {
+                corectedImg = corectedImg.rotated(by: -90)
+            } else {
+                uimage = uimage.rotated(by: -90)
+            }
         }
     }
     
@@ -119,6 +129,79 @@ extension UIImage {
         }
     }
     
+    func normalizedOrientation() -> UIImage {
+        guard imageOrientation != .up else { return self }
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { _ in
+            draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
+
+    func rotated(by degrees: CGFloat) -> UIImage {
+        let radians = degrees * .pi / 180
+        let rotatedSize = CGRect(origin: .zero, size: size)
+            .applying(CGAffineTransform(rotationAngle: radians))
+            .integral.size
+
+        let renderer = UIGraphicsImageRenderer(size: rotatedSize)
+
+        return renderer.image { context in
+            let cgContext = context.cgContext
+            cgContext.translateBy(x: rotatedSize.width / 2, y: rotatedSize.height / 2)
+            cgContext.rotate(by: radians)
+            draw(in: CGRect(x: -size.width / 2, y: -size.height / 2, width: size.width, height: size.height))
+        }
+    }
+    
+    func rotated2(by degrees: Int) -> UIImage {
+        let angle = ((degrees % 360) + 360) % 360
+        guard let cgImage, [90, 180, 270].contains(angle) else { return self }
+        
+        var format = vImage_CGImageFormat(
+            bitsPerComponent: 8,
+            bitsPerPixel: 32,
+            colorSpace: Unmanaged.passRetained(CGColorSpaceCreateDeviceRGB()),
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.first.rawValue),
+            version: 0,
+            decode: nil,
+            renderingIntent: .defaultIntent
+        )
+        var source = vImage_Buffer()
+        guard vImageBuffer_InitWithCGImage(&source, &format, nil, cgImage, vImage_Flags(kvImageNoFlags)) == kvImageNoError else { return self }
+
+        defer { free(source.data) }
+
+        var destination = vImage_Buffer()
+
+        var background: UInt8 = 0
+
+        let rotation: UInt8 = angle == 90 ? UInt8(kRotate90DegreesClockwise) : angle == 180 ? UInt8(kRotate180DegreesClockwise) : UInt8(kRotate270DegreesClockwise)
+
+        guard vImageRotate90_ARGB8888(&source, &destination, rotation, &background, vImage_Flags(kvImageNoFlags)) == kvImageNoError else { return self }
+
+        defer { free(destination.data) }
+
+        guard let output = vImageCreateCGImageFromBuffer(&destination, &format, nil, nil, vImage_Flags(kvImageNoFlags), nil)?.takeRetainedValue() else { return self }
+
+        return UIImage(cgImage: output, scale: scale, orientation: .up)
+
+    }
+
+    private func normalizedCGImage() -> CGImage? {
+        guard imageOrientation != .up else { return cgImage }
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { _ in
+            draw(in: CGRect(origin: .zero, size: size))
+        }.cgImage
+    }
+ 
 }
 
 extension Array where Element == OCRTextItem {
