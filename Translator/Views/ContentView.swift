@@ -98,8 +98,13 @@ struct ContentView: View {
                         Button {
                             route = .store
                         } label: {
-                            Image(systemName: "list.number").font(.title2)
+                            ZStack {
+                                Image(systemName: "star.fill").foregroundStyle(.yellow)
+                                Image(systemName: "star").foregroundStyle(.black)
+                            }
+                            .font(.title2)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }
