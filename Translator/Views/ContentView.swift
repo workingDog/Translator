@@ -36,8 +36,9 @@ struct ContentView: View {
     @State private var showCamera = false
     @State private var showSmart = false
     @State private var showImport = false
-    @State private var showSettings = false
     @State private var cameraCancel = false
+    
+    // @State private var showSettings = false
     
     
     var body: some View {
@@ -87,13 +88,13 @@ struct ContentView: View {
                             Image(systemName: "tray.and.arrow.down")
                         }
                     }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showSettings.toggle()
-                        } label: {
-                            Image(systemName: "gear")
-                        }
-                    }
+//                    ToolbarItem(placement: .topBarTrailing) {
+//                        Button {
+//                            showSettings.toggle()
+//                        } label: {
+//                            Image(systemName: "gear")
+//                        }
+//                    }
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
                             route = .store
@@ -139,10 +140,10 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showCamera) {
             CameraView(selectedImages: $selectedImages, cameraCancel: $cameraCancel)
         }
-        .sheet(isPresented: $showSettings) {
-            SettingsView().environment(translator)
-                .presentationDetents([.medium])
-        }
+//        .sheet(isPresented: $showSettings) {
+//            SettingsView().environment(translator)
+//                .presentationDetents([.medium])
+//        }
     }
     
     @ViewBuilder

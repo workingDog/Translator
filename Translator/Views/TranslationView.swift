@@ -24,42 +24,44 @@ struct TranslationView: View {
             EnglishView().padding(5)
                 .toolbar {
                     
-                    ToolbarItem(placement: .principal) {
-                        HStack {
-                            Button {
-                                if !isSaved {
-                                    translator.saveTranslatedMenu(
-                                        title: "Restaurant Menu",
-                                        modelContext: modelContext)
-                                    isSaved = true
-                                }
-                            } label: {
-                                ZStack {
-                                    Image(systemName: "star.fill").foregroundStyle(.yellow)
-                                    Image(systemName: "star").foregroundStyle(.black)
-                                }
-                                .font(.title2)
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            if !isSaved {
+                                translator.saveTranslatedMenu(
+                                    title: "Restaurant Menu",
+                                    modelContext: modelContext)
+                                isSaved = true
                             }
-                            .buttonStyle(.glass)
-                            .disabled(isSaved)
-                            
-                            Button {
-                                doTranslation()
-                            } label: {
-                                Image(systemName: "translate")
+                        } label: {
+                            ZStack {
+                                Image(systemName: "star.fill").foregroundStyle(.yellow)
+                                Image(systemName: "star").foregroundStyle(.black)
                             }
-                            .buttonStyle(.glass)
+                            .font(.title2)
                         }
+                        .buttonStyle(.glass)
+                        .disabled(isSaved)
                     }
                     
-                    ToolbarItemGroup(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .principal) {
+                        Button {
+                            doTranslation()
+                        } label: {
+                            Image(systemName: "translate")
+                        }
+                        .buttonStyle(.glass)
+                    }
+
+                    ToolbarItem(placement: .bottomBar) {
                         Button {
                             translator.selectedImageItem?.isCorrected.toggle()
                         } label: {
                             Image(systemName: "perspective").font(.title2)
                         }
                         .buttonStyle(.glass)
-                        
+                    }
+                    
+                    ToolbarItem(placement: .bottomBar) {
                         Button {
                             translator.selectedImageItem?.isRotated.toggle()
                         } label: {
