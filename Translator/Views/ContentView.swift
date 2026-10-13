@@ -100,7 +100,7 @@ struct ContentView: View {
                                 Image(systemName: "star.fill").foregroundStyle(.yellow)
                                 Image(systemName: "star").foregroundStyle(.black)
                             }
-                            .font(.title2)
+                            .font(.title)
                         }
                         .buttonStyle(.plain)
                     }

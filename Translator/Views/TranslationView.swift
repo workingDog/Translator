@@ -29,7 +29,7 @@ struct TranslationView: View {
                         Button {
                             if !isSaved {
                                 translator.saveTranslatedMenu(
-                                    title: "Restaurant Menu",
+                                    title: "Menu",
                                     modelContext: modelContext)
                                 isSaved = true
                             }
@@ -38,9 +38,8 @@ struct TranslationView: View {
                                 Image(systemName: "star.fill").foregroundStyle(.yellow)
                                 Image(systemName: "star").foregroundStyle(.black)
                             }
-                            .font(.title2)
+                            .font(.title)
                         }
-                        .buttonStyle(.glass)
                         .disabled(isSaved)
                     }
                     
@@ -48,7 +47,7 @@ struct TranslationView: View {
                         Button {
                             doTranslation()
                         } label: {
-                            Image(systemName: "translate")
+                            Image(systemName: "translate").font(.title)
                         }
                         .buttonStyle(.glass)
                         .disabled(isTranslated)
