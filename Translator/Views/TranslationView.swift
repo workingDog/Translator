@@ -21,18 +21,11 @@ struct TranslationView: View {
         ZStack {
             AppBackground().ignoresSafeArea()
             
-            EnglishView().padding(10)
+            EnglishView().padding(5)
                 .toolbar {
                     
                     ToolbarItem(placement: .principal) {
                         HStack {
-                            Button {
-                                doTranslation()
-                            } label: {
-                                Image(systemName: "translate")
-                            }
-                            .buttonStyle(.glass)
-                            
                             Button {
                                 if !isSaved {
                                     translator.saveTranslatedMenu(
@@ -49,32 +42,38 @@ struct TranslationView: View {
                             }
                             .buttonStyle(.glass)
                             .disabled(isSaved)
+                            
+                            Button {
+                                doTranslation()
+                            } label: {
+                                Image(systemName: "translate")
+                            }
+                            .buttonStyle(.glass)
                         }
-                        
                     }
                     
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         Button {
-                            if var item = translator.selectedImageItem {
-                                item.isCorrected.toggle()
-                                translator.updateImageItem(corrected: item.isCorrected)
-                            }
+                            translator.selectedImageItem?.isCorrected.toggle()
                         } label: {
                             Image(systemName: "perspective").font(.title2)
                         }
                         .buttonStyle(.glass)
                         
                         Button {
-                            if var item = translator.selectedImageItem {
-                                item.isRotated.toggle()
-                                translator.updateImageItem(rotated: item.isRotated)
-                            }
+                            translator.selectedImageItem?.isRotated.toggle()
                         } label: {
                             Image(systemName: "rotate.right").font(.title2)
                         }
                         .buttonStyle(.glass)
                     }
                 }
+        }
+        // when translator.translationConfiguration changes, it will activate this task
+        .translationTask(translator.translationConfiguration) { session in
+            translator.isProcessing = true
+            await translator.translateOCRItems(using: session)
+            translator.isProcessing = false
         }
     }
     
@@ -83,7 +82,7 @@ struct TranslationView: View {
             translator.isProcessing = true
             // do OCR
             await translator.doRecognition()
-            // do translation
+            // activate .translationTask(...) for translation
             translator.translationConfiguration = TranslationSession.Configuration(
                 source: Locale.Language(identifier: "ja"),
                 target: Locale.Language(identifier: "en"),

@@ -36,18 +36,6 @@ final class TranslatorModel {
     
     init() { }
     
-    // because ImageItem is a struct, and internal changes are not observed
-    func updateImageItem(corrected: Bool? = nil, rotated: Bool? = nil) {
-        guard var item = selectedImageItem else { return }
-        if let corrected {
-            item.isCorrected = corrected
-        }
-        if let rotated {
-            item.isRotated = rotated
-        }
-        selectedImageItem = item
-    }
-    
     func resetTranslation() {
         japaneseText = ""
         englishText = ""

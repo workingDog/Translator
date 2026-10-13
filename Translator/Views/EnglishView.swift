@@ -20,8 +20,8 @@ struct EnglishView: View {
             
             VStack(alignment: .leading, spacing: 10) {
                 
-                VStack(spacing: 15) {
-                    HStack(spacing: 12) {
+                VStack(spacing: 10) {
+                    HStack(spacing: 5) {
                         Image(systemName: "textformat.size").bold()
                         Slider(value: $translator.fontScale, in: 0.5...1.8, step: 0.05)
                         Text("\(Int(translator.fontScale * 100))")
@@ -29,7 +29,7 @@ struct EnglishView: View {
                             .frame(width: 50, alignment: .trailing)
                     }.padding(5)
                     
-                    HStack(spacing: 12) {
+                    HStack(spacing: 5) {
                         Image(systemName: "distribute.vertical").bold()
                         Slider(value: $translator.spacing, in: 0...250, step: 1)
                         Text("\(Int(translator.spacing))")
@@ -60,23 +60,6 @@ struct EnglishView: View {
                 OCRImageView(isClean: showClean)
                 
             }
-        }
-//        .task {
-//            translator.isProcessing = true
-//            // do OCR
-//            await translator.doRecognition()
-//            // do translation
-//            translator.translationConfiguration = TranslationSession.Configuration(
-//                source: Locale.Language(identifier: "ja"),
-//                target: Locale.Language(identifier: "en"),
-//                preferredStrategy: .highFidelity
-//            )
-//        }
-        // when translator.translationConfiguration changed, it will activate this task
-        .translationTask(translator.translationConfiguration) { session in
-            translator.isProcessing = true
-            await translator.translateOCRItems(using: session)
-            translator.isProcessing = false
         }
     }
     

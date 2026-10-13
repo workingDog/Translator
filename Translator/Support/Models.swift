@@ -10,6 +10,48 @@ import FoundationModels
 import Vision
 
 
+@MainActor
+@Observable
+final class ImageItem: Identifiable {
+    let id = UUID()
+    
+    var uimage: UIImage
+    var corectedImg: UIImage
+    
+    var isCorrected = false {
+        didSet {
+            guard isCorrected, !oldValue else { return }
+            corectedImg = MenuPerspectiveCorrection.correct(uimage) ?? UIImage()
+        }
+    }
+
+    var isRotated = false {
+        didSet {
+            guard isRotated != oldValue else { return }
+            if isCorrected {
+                corectedImg = corectedImg.rotated(by: -90)
+            } else {
+                uimage = uimage.rotated(by: -90)
+            }
+        }
+    }
+    
+    init(uimage: UIImage, corectedImg: UIImage = UIImage()) {
+        self.uimage = uimage
+        self.corectedImg = corectedImg
+    }
+
+    var imgData: Data? {
+        if isCorrected {
+            let resized = corectedImg.resizedToFitWidth(1280)
+            return resized.jpegData(compressionQuality: 0.9)
+        }
+        let resized = uimage.resizedToFitWidth(1280)
+        return resized.jpegData(compressionQuality: 0.9)
+    }
+
+}
+
 @Model
 final class TranslatedMenu {
     var menuid: UUID
