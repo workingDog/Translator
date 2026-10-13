@@ -16,12 +16,10 @@ struct OCRImageView: View {
         if let imgItem = translator.selectedImageItem {
             
             let image = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
-            let imagin  = isClean ? UIImage(size: image.size) : image
+            let imagin = isClean ? UIImage(size: image.size) : image
             
-            ZoomableImageView(
-                image: imagin,
-                items: translator.ocrTextItems,
-                menu: nil)
+            ZoomableImageView(image: imagin, items: translator.ocrTextItems)
+            
         }
     }
 

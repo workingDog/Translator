@@ -26,7 +26,7 @@ struct SavedMenuView: View {
             AppBackground().ignoresSafeArea()
             
             if let image = UIImage(data: menu.imageData) {
-                let (savedOCRData, savedMenuAI) = decodeMenu(menu)
+                let savedOCRData = decodeMenu(menu)
                 
                 GeometryReader { geometry in
                     VStack(alignment: .leading, spacing: 10) {
@@ -74,11 +74,8 @@ struct SavedMenuView: View {
                         
                         let imagin = showClean ? UIImage(size: image.size) : image
                         
-                        ZoomableImageView(
-                            image: imagin,
-                            items: savedOCRData?.items ?? [],
-                            menu: savedMenuAI
-                        )
+                        ZoomableImageView(image: imagin, items: savedOCRData?.items ?? [])
+                        
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .zIndex(0)
                         .clipped()
@@ -114,10 +111,8 @@ struct SavedMenuView: View {
         }
     }
     
-    func decodeMenu(_ menu: TranslatedMenu) -> (ocr: SavedOCRData?, ai: MenuTranslation?) {
-        let ocr = menu.ocrData.flatMap { try? JSONDecoder().decode(SavedOCRData.self, from: $0) }
-        let ai = menu.aiData.flatMap { try? JSONDecoder().decode(MenuTranslation.self, from: $0) }
-        return (ocr, ai)
+    func decodeMenu(_ menu: TranslatedMenu) -> SavedOCRData? {
+        return menu.ocrData.flatMap { try? JSONDecoder().decode(SavedOCRData.self, from: $0) }
     }
     
 }

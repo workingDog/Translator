@@ -7,8 +7,6 @@
 import SwiftUI
 import SwiftData
 import Translation
-import FoundationModels
-import Vision
 
 
 @MainActor
@@ -26,8 +24,6 @@ final class TranslatorModel {
     var translationConfiguration: TranslationSession.Configuration?
     
     var ocrTextItems: [OCRTextItem] = []
-    
-    var menuTranslation: MenuTranslation?
     
     @ObservationIgnored var ocrService = OCRService()
     
@@ -156,14 +152,8 @@ final class TranslatorModel {
         let savedOCRData = SavedOCRData(items: ocrTextItems)
         
         guard let ocrData = try? JSONEncoder().encode(savedOCRData) else { return }
-        let aiData = menuTranslation.flatMap { try? JSONEncoder().encode($0) }
         
-        let savedMenu = TranslatedMenu(
-            title: title,
-            imageData: imageData,
-            ocrData: ocrData,
-            aiData: aiData
-        )
+        let savedMenu = TranslatedMenu(title: title, imageData: imageData, ocrData: ocrData)
         
         modelContext.insert(savedMenu)
         do {

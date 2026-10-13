@@ -6,8 +6,6 @@
 //
 import SwiftUI
 import SwiftData
-import FoundationModels
-import Vision
 
 
 @MainActor
@@ -64,16 +62,15 @@ final class TranslatedMenu {
     var imageData: Data
     var createdAt: Date
     var ocrData: Data?
-    var aiData: Data?
+//    var aiData: Data?
     
-    init(title: String, imageData: Data, ocrData: Data? = nil, aiData: Data? = nil) {
+    init(title: String, imageData: Data, ocrData: Data? = nil) {
         self.menuid = UUID()
         
         self.title = title
         self.imageData = imageData
         self.createdAt = Date()
         self.ocrData = ocrData
-        self.aiData = aiData
     }
 }
 
@@ -93,23 +90,4 @@ nonisolated struct OCRTextItem: Identifiable, Codable {
 
 struct SavedOCRData: Codable {
     let items: [OCRTextItem]
-}
-
-@Generable
-struct MenuTranslation: Codable {
-    var sections: [MenuSection]
-}
-
-@Generable
-struct MenuSection: Codable {
-    var title: String
-    var items: [MenuItem]
-}
-
-@Generable
-struct MenuItem: Codable {
-    var japanese: String
-    var english: String
-    var description: String?
-    var price: String?
 }

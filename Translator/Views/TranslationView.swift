@@ -7,8 +7,6 @@
 import SwiftUI
 import SwiftData
 import Translation
-import FoundationModels
-import Vision
 
 
 struct TranslationView: View {

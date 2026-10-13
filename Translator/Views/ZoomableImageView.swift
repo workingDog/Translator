@@ -12,7 +12,6 @@ struct ZoomableImageView: View {
     
     let image: UIImage
     let items: [OCRTextItem]
-    let menu: MenuTranslation?
     
     @State private var zoomScale: CGFloat = 1
     @State private var panOffset: CGSize = .zero
