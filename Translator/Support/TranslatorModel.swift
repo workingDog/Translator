@@ -20,8 +20,6 @@ final class TranslatorModel {
     var japaneseText = ""
     var englishText = ""
     var isProcessing = false
-    var showPerspective = true
-    var showRotation = true
     var errorMessage: String?
     var fontScale: Double = 1.0
     var spacing: Double = 0.0
@@ -48,7 +46,7 @@ final class TranslatorModel {
     
     func doRecognition() async {
         if let imgItem = selectedImageItem {
-            let theImg = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
+            let theImg = imgItem.getImage()
             await process(image: theImg)
         }
     }
@@ -90,7 +88,7 @@ final class TranslatorModel {
         
         guard let imgItem = selectedImageItem else { return UIImage() }
         
-        let image = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
+        let image = imgItem.getImage()
         
         let renderer = UIGraphicsImageRenderer(size: image.size)
         
@@ -151,7 +149,7 @@ final class TranslatorModel {
     func saveTranslatedMenu(title: String, modelContext: ModelContext) {
         guard let imgItem = selectedImageItem else { return }
         
-        let image = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
+        let image = imgItem.getImage()
         
         guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
         

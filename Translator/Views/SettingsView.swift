@@ -29,20 +29,21 @@ struct SettingsView: View {
                         Spacer()
                     }
                 }
-                HStack {
-                    Text("Correction").font(.title2)
-                    Image(systemName: "perspective").font(.title).padding(20)
-                    Toggle("", isOn: $translator.showPerspective).fixedSize()
-                    Spacer()
-                }
-                .padding(.top, 40)
                 
-                HStack {
-                    Text("Rotation").font(.title2)
-                    Image(systemName: "rotate.right").font(.title).padding(20)
-                    Toggle("", isOn: $translator.showRotation).fixedSize()
-                    Spacer()
-                }
+//                HStack {
+//                    Text("Correction").font(.title2)
+//                    Image(systemName: "perspective").font(.title).padding(20)
+//                    Toggle("", isOn: $translator.showPerspective).fixedSize()
+//                    Spacer()
+//                }
+//                .padding(.top, 40)
+//                
+//                HStack {
+//                    Text("Rotation").font(.title2)
+//                    Image(systemName: "rotate.right").font(.title).padding(20)
+//                    Toggle("", isOn: $translator.showRotation).fixedSize()
+//                    Spacer()
+//                }
                 
                 Spacer()
             }

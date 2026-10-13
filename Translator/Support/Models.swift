@@ -49,6 +49,10 @@ final class ImageItem: Identifiable {
         let resized = uimage.resizedToFitWidth(1280)
         return resized.jpegData(compressionQuality: 0.9)
     }
+    
+    func getImage() -> UIImage {
+        isCorrected ? corectedImg : uimage
+    }
 
 }
 
