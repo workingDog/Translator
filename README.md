@@ -1,7 +1,7 @@
-#  Japanese to English menu translation
+#  Japanese to English restaurant menu translation
 
 
-An experiment to develop my own Japanese menu translation. 
+An experiment to develop my own Japanese restaurant menu translation. 
 
 Currently using OCR with **VNRecognizeTextRequest** and translation using **TranslationSession**.
 

@@ -63,15 +63,15 @@ final class TranslatedMenu {
     var createdAt: Date
     var ocrData: Data?
 //    var aiData: Data?
-    
-    init(title: String, imageData: Data, ocrData: Data? = nil) {
-        self.menuid = UUID()
-        
+
+    init(menuid: UUID, title: String, imageData: Data, ocrData: Data) {
+        self.menuid = menuid
         self.title = title
         self.imageData = imageData
-        self.createdAt = Date()
         self.ocrData = ocrData
+        self.createdAt = .now
     }
+
 }
 
 nonisolated struct OCRTextItem: Identifiable, Codable {

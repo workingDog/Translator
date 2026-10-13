@@ -16,6 +16,9 @@ struct TranslationView: View {
     @State private var isSaved = false
     @State private var isTranslated = false
     
+    let menuid = UUID()
+    let title = "Menu \(Int.random(in: 1...1000))"
+    
     var body: some View {
         ZStack {
             AppBackground().ignoresSafeArea()
@@ -25,12 +28,10 @@ struct TranslationView: View {
                     
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            if !isSaved {
-                                translator.saveTranslatedMenu(
-                                    title: "Menu",
-                                    modelContext: modelContext)
-                                isSaved = true
-                            }
+                            translator.saveTranslatedMenu(
+                                title: title,
+                                menuid: menuid,
+                                modelContext: modelContext)
                         } label: {
                             ZStack {
                                 Image(systemName: "star.fill").foregroundStyle(.yellow)
@@ -39,7 +40,6 @@ struct TranslationView: View {
                             .font(.title)
                         }
                         .buttonStyle(.plain)
-                        .disabled(isSaved)
                     }
                     
                     ToolbarItem(placement: .principal) {
@@ -51,14 +51,13 @@ struct TranslationView: View {
                         .buttonStyle(.glass)
                         .disabled(isTranslated)
                     }
-
+                    
                     ToolbarItem(placement: .bottomBar) {
                         Button {
                             translator.selectedImageItem?.isCorrected.toggle()
                         } label: {
                             Image(systemName: "perspective").font(.title2)
                         }
-                        .buttonStyle(.glass)
                         .disabled(isTranslated)
                     }
                     
@@ -68,9 +67,13 @@ struct TranslationView: View {
                         } label: {
                             Image(systemName: "rotate.right").font(.title2)
                         }
-                        .buttonStyle(.glass)
                         .disabled(isTranslated)
                     }
+                    
+                    ToolbarItem(placement: .status) {
+                        Text(title)
+                    }
+                    
                 }
         }
         // when translator.translationConfiguration changes, it will activate this task

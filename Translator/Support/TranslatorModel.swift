@@ -143,26 +143,36 @@ final class TranslatorModel {
     }
     
     @MainActor
-    func saveTranslatedMenu(title: String, modelContext: ModelContext) {
+    func saveTranslatedMenu(title: String, menuid: UUID, modelContext: ModelContext) {
         guard let imgItem = selectedImageItem else { return }
-        
-        let image = imgItem.getImage()
-        
-        guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
+        guard let imageData = imgItem.getImage().jpegData(compressionQuality: 0.9) else { return }
         
         let savedOCRData = SavedOCRData(items: ocrTextItems)
         
         guard let ocrData = try? JSONEncoder().encode(savedOCRData) else { return }
         
-        let savedMenu = TranslatedMenu(title: title, imageData: imageData, ocrData: ocrData)
-        
-        modelContext.insert(savedMenu)
+        let descriptor = FetchDescriptor<TranslatedMenu>(
+            predicate: #Predicate { $0.menuid == menuid })
         do {
+            if let savedMenu = try modelContext.fetch(descriptor).first {
+                savedMenu.title = title
+                savedMenu.imageData = imageData
+                savedMenu.ocrData = ocrData
+                savedMenu.createdAt = .now
+            } else {
+                let savedMenu = TranslatedMenu(
+                    menuid: menuid, title: title,
+                    imageData: imageData,
+                    ocrData: ocrData
+                )
+                modelContext.insert(savedMenu)
+            }
             try modelContext.save()
         } catch {
             print("Failed to save translated menu: \(error)")
         }
     }
+    
 }
 
 //---------------AI-----------------------------
