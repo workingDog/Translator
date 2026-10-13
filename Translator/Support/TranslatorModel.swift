@@ -43,8 +43,7 @@ final class TranslatorModel {
     
     func doRecognition() async {
         if let imgItem = selectedImageItem {
-            let theImg = imgItem.getImage()
-            await process(image: theImg)
+            await process(image: imgItem.getImage())
         }
     }
     
@@ -55,9 +54,8 @@ final class TranslatorModel {
         
         do {
             ocrTextItems = try await ocrService.recognizeJapaneseText(from: image)
-            let text = ocrTextItems.reconstructedText()
-            japaneseText = text
-            guard !text.trim().isEmpty else {
+            japaneseText = ocrTextItems.reconstructedText()
+            guard !japaneseText.trim().isEmpty else {
                 errorMessage = "No Japanese text was recognized."
                 return
             }
