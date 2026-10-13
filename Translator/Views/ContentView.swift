@@ -52,9 +52,6 @@ struct ContentView: View {
                     
                     selectedImagesView
                     
-                    if let errorMessage = translator.errorMessage {
-                        Text(errorMessage).foregroundStyle(.red)
-                    }
                 }
                 .navigationDestination(item: $route) { route in
                     if route == .store {

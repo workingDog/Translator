@@ -16,6 +16,7 @@ struct TranslationView: View {
     @Environment(TranslatorModel.self) private var translator
     
     @State private var isSaved = false
+    @State private var isTranslated = false
     
     var body: some View {
         ZStack {
@@ -50,6 +51,7 @@ struct TranslationView: View {
                             Image(systemName: "translate")
                         }
                         .buttonStyle(.glass)
+                        .disabled(isTranslated)
                     }
 
                     ToolbarItem(placement: .bottomBar) {
@@ -59,6 +61,7 @@ struct TranslationView: View {
                             Image(systemName: "perspective").font(.title2)
                         }
                         .buttonStyle(.glass)
+                        .disabled(isTranslated)
                     }
                     
                     ToolbarItem(placement: .bottomBar) {
@@ -68,6 +71,7 @@ struct TranslationView: View {
                             Image(systemName: "rotate.right").font(.title2)
                         }
                         .buttonStyle(.glass)
+                        .disabled(isTranslated)
                     }
                 }
         }
@@ -90,6 +94,7 @@ struct TranslationView: View {
                 target: Locale.Language(identifier: "en"),
                 preferredStrategy: .highFidelity
             )
+            isTranslated = true
         }
     }
     

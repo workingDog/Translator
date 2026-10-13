@@ -59,6 +59,10 @@ struct EnglishView: View {
                 
                 OCRImageView(isClean: showClean)
                 
+                if let errorMessage = translator.errorMessage {
+                    Text(errorMessage).foregroundStyle(.red)
+                }
+                
             }
         }
     }
