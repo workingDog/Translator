@@ -38,6 +38,7 @@ struct TranslationView: View {
                             }
                             .font(.title)
                         }
+                        .buttonStyle(.plain)
                         .disabled(isSaved)
                     }
                     
