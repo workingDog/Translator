@@ -9,7 +9,7 @@ import Vision
 import ImageIO
 
 
-enum MenuPerspectiveCorrection {
+enum Perspective {
     private static let ciContext = CIContext()
 
     static func correct(_ image: UIImage) -> UIImage? {

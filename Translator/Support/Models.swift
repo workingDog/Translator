@@ -19,7 +19,7 @@ final class ImageItem: Identifiable {
     var isCorrected = false {
         didSet {
             guard isCorrected, !oldValue else { return }
-            corectedImg = MenuPerspectiveCorrection.correct(uimage) ?? UIImage()
+            corectedImg = Perspective.correct(uimage) ?? UIImage()
         }
     }
 

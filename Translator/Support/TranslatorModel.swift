@@ -153,6 +153,7 @@ final class TranslatorModel {
         
         let descriptor = FetchDescriptor<TranslatedMenu>(
             predicate: #Predicate { $0.menuid == menuid })
+        
         do {
             if let savedMenu = try modelContext.fetch(descriptor).first {
                 savedMenu.title = title
@@ -161,7 +162,8 @@ final class TranslatorModel {
                 savedMenu.createdAt = .now
             } else {
                 let savedMenu = TranslatedMenu(
-                    menuid: menuid, title: title,
+                    menuid: menuid,
+                    title: title,
                     imageData: imageData,
                     ocrData: ocrData
                 )
