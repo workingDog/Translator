@@ -61,17 +61,17 @@ struct EnglishView: View {
                 
             }
         }
-        .task {
-            translator.isProcessing = true
-            // do OCR
-            await translator.doRecognition()
-            // do translation
-            translator.translationConfiguration = TranslationSession.Configuration(
-                source: Locale.Language(identifier: "ja"),
-                target: Locale.Language(identifier: "en"),
-                preferredStrategy: .highFidelity
-            )
-        }
+//        .task {
+//            translator.isProcessing = true
+//            // do OCR
+//            await translator.doRecognition()
+//            // do translation
+//            translator.translationConfiguration = TranslationSession.Configuration(
+//                source: Locale.Language(identifier: "ja"),
+//                target: Locale.Language(identifier: "en"),
+//                preferredStrategy: .highFidelity
+//            )
+//        }
         // when translator.translationConfiguration changed, it will activate this task
         .translationTask(translator.translationConfiguration) { session in
             translator.isProcessing = true

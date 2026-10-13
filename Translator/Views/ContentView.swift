@@ -148,54 +148,21 @@ struct ContentView: View {
     @ViewBuilder
     var selectedImagesView: some View {
         List {
-            ForEach(Array(selectedImages.enumerated()), id: \.element.id) { index, imgItem in
-                
-                HStack {
-
-                    VStack(spacing: 20) {
-                        if translator.showPerspective {
-                            Button {
-                                selectedImages[index].isCorrected.toggle()
-                            } label: {
-                                Image(systemName: "perspective")
-                                    .font(.title2)
-                                    .foregroundStyle(imgItem.isCorrected ? Color.red : Color.primary)
-                                    .overlay {
-                                        if imgItem.isCorrected {
-                                            Circle().stroke(Color.red, lineWidth: 1.5)
-                                        }
-                                    }
-                            }
-                            .buttonStyle(.glass)
-                        }
-                        
-                        if translator.showRotation {
-                            Button {
-                                selectedImages[index].isRotated.toggle()
-                            } label: {
-                                Image(systemName: "rotate.right").font(.title2)
-                            }
-                            .buttonStyle(.glass)
-                        }
+            ForEach(selectedImages) { imgItem in
+                Image(uiImage: imgItem.uimage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 330, height: 280)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                    .clipped()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        translator.resetTranslation()
+                        translator.selectedImageItem = imgItem
+                        route = .translation
                     }
-                    
-                    let theImg = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
-                    
-                    Image(uiImage: theImg)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 330, height: 280)
-                        .clipShape(RoundedRectangle(cornerRadius: 15))
-                        .clipped()
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            translator.resetTranslation()
-                            translator.selectedImage = theImg
-                            route = .translation
-                        }
-                        .padding(5)
-                }
-                .listRowInsets(EdgeInsets(top: 2.5,leading: 0,bottom: 2.5,trailing: 0))
+                    .padding(5)
+                    .listRowInsets(EdgeInsets(top: 2.5,leading: 0,bottom: 2.5,trailing: 0))
             }
             .onDelete(perform: deleteImage)
             .listRowBackground(Color.clear)

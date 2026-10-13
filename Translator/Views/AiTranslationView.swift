@@ -10,7 +10,7 @@ import Translation
 import FoundationModels
 import Vision
 
-
+/*
 struct AiTranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
@@ -62,3 +62,4 @@ struct AiTranslationView: View {
     }
 
 }
+*/

@@ -15,8 +15,8 @@ import Vision
 @Observable
 final class TranslatorModel {
     
-    var testImage: UIImage?
-    var selectedImage: UIImage?
+    var selectedImageItem: ImageItem?
+    
     var japaneseText = ""
     var englishText = ""
     var isProcessing = false
@@ -36,6 +36,18 @@ final class TranslatorModel {
     
     init() { }
     
+    // because ImageItem is a struct, and internal changes are not observed
+    func updateImageItem(corrected: Bool? = nil, rotated: Bool? = nil) {
+        guard var item = selectedImageItem else { return }
+        if let corrected {
+            item.isCorrected = corrected
+        }
+        if let rotated {
+            item.isRotated = rotated
+        }
+        selectedImageItem = item
+    }
+    
     func resetTranslation() {
         japaneseText = ""
         englishText = ""
@@ -43,11 +55,13 @@ final class TranslatorModel {
         errorMessage = nil
         isProcessing = false
         translationConfiguration = nil
+        selectedImageItem = nil
     }
     
     func doRecognition() async {
-        if let img = selectedImage {
-            await process(image: img)
+        if let imgItem = selectedImageItem {
+            let theImg = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
+            await process(image: theImg)
         }
     }
     
@@ -85,8 +99,11 @@ final class TranslatorModel {
     
     @MainActor
     func renderTranslatedMenu() -> UIImage {
-        print("-----------> renderTranslatedMenu")
-        guard let image = selectedImage else { return UIImage() }
+        
+        guard let imgItem = selectedImageItem else { return UIImage() }
+        
+        let image = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
+        
         let renderer = UIGraphicsImageRenderer(size: image.size)
         
         return renderer.image { context in
@@ -116,36 +133,6 @@ final class TranslatorModel {
         }
     }
     
-    /*
-     
-     @MainActor
-     func renderTranslatedMenu() -> UIImage {
-         guard let image = selectedImage else { return UIImage() }
-         let renderer = UIGraphicsImageRenderer(size: image.size)
-         
-         return renderer.image { context in
-             image.draw(in: CGRect(origin: .zero, size: image.size))
-             
-             for item in ocrTextItems {
-                 guard !item.text.isEmpty else { continue }
-                 let box = CGRect(
-                     x: item.boundingBox.minX * image.size.width,
-                     y: (1 - item.boundingBox.maxY) * image.size.height,
-                     width: item.boundingBox.width * image.size.width,
-                     height: item.boundingBox.height * image.size.height
-                 )
-                 let fontSize = max(box.height * 0.72 * fontScale, 8)
-                 let font = UIFont.systemFont(ofSize: fontSize)
-                 let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: UIColor.label]
-                 UIColor.systemBackground.withAlphaComponent(0.92).setFill()
-                 UIBezierPath(roundedRect: box.insetBy(dx: -4, dy: -2), cornerRadius: 3).fill()
-                 (item.text as NSString).draw(in: box.insetBy(dx: 4, dy: 2), withAttributes: attributes)
-             }
-             
-         }
-     }
-     */
-    
     func translateOCRItems(using session: TranslationSession) async {
         var theItems: [OCRTextItem] = []
         
@@ -154,7 +141,7 @@ final class TranslatorModel {
         }
         do {
             let responses = try await session.translations(from: requests)
-
+            
             for (item, response) in zip(ocrTextItems, responses) {
                 theItems.append(
                     OCRTextItem(
@@ -174,8 +161,11 @@ final class TranslatorModel {
     
     @MainActor
     func saveTranslatedMenu(title: String, modelContext: ModelContext) {
-        guard let image = selectedImage,
-              let imageData = image.jpegData(compressionQuality: 0.9) else { return }
+        guard let imgItem = selectedImageItem else { return }
+        
+        let image = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
+        
+        guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
         
         let savedOCRData = SavedOCRData(items: ocrTextItems)
         
@@ -196,9 +186,10 @@ final class TranslatorModel {
             print("Failed to save translated menu: \(error)")
         }
     }
+}
     
     //---------------AI-----------------------------
-
+/*
     func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
         let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
         
@@ -518,7 +509,7 @@ final class TranslatorModel {
     
 }
 
-
+*/
 
 
 
