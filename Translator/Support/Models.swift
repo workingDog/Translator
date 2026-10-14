@@ -60,15 +60,16 @@ final class TranslatedMenu {
     
     var title: String
     var imageData: Data
-    var createdAt: Date
     var ocrData: Data?
-//    var aiData: Data?
+    var extraData: Data?
+    var createdAt: Date
 
-    init(menuid: UUID, title: String, imageData: Data, ocrData: Data) {
+    init(menuid: UUID, title: String, imageData: Data, ocrData: Data, extraData: Data? = nil) {
         self.menuid = menuid
         self.title = title
         self.imageData = imageData
         self.ocrData = ocrData
+        self.extraData = extraData
         self.createdAt = .now
     }
 
