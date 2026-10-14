@@ -24,17 +24,11 @@ struct EnglishView: View {
                     HStack(spacing: 5) {
                         Image(systemName: "textformat.size").bold()
                         Slider(value: $translator.fontScale, in: 0.5...1.8, step: 0.05)
-                        Text("\(Int(translator.fontScale * 100))")
-                            .monospacedDigit()
-                            .frame(width: 50, alignment: .trailing)
                     }.padding(5)
                     
                     HStack(spacing: 5) {
                         Image(systemName: "distribute.vertical").bold()
                         Slider(value: $translator.spacing, in: 0...250, step: 1)
-                        Text("\(Int(translator.spacing))")
-                            .monospacedDigit()
-                            .frame(width: 50, alignment: .trailing)
                     }.padding(5)
                     
                     if translator.isProcessing {
