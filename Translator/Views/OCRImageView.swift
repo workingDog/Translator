@@ -10,13 +10,13 @@ import SwiftUI
 struct OCRImageView: View {
     @Environment(TranslatorModel.self) private var translator
 
-    let isClean: Bool
+    let showTransparent: Bool
     
     var body: some View {
         if let imgItem = translator.selectedImageItem {
             
             let image = imgItem.isCorrected ? imgItem.corectedImg : imgItem.uimage
-            let imagin = isClean ? UIImage(size: image.size) : image
+            let imagin = showTransparent ? UIImage(size: image.size) : image
             
             ZoomableImageView(image: imagin, items: translator.ocrTextItems)
             

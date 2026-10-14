@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-
+// not used
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(TranslatorModel.self) private var translator

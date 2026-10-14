@@ -1,5 +1,5 @@
 //
-//  PerspectiveCorrection.swift
+//  Perspective.swift
 //  Translator
 //
 //  Created by Ringo Wathelet on 2026/10/11.

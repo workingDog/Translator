@@ -18,10 +18,8 @@ enum PhotoError: LocalizedError {
 }
 
 enum NavRoute: Hashable {
-    case japanese
     case english
     case store
-    case smart
     case translation
 }
 

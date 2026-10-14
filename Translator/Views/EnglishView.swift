@@ -11,7 +11,7 @@ import Translation
 struct EnglishView: View {
     @Environment(TranslatorModel.self) private var translator
     
-    @State private var showClean = false
+    @State private var showTransparent = false
     
     var body: some View {
         @Bindable var translator = translator
@@ -44,7 +44,7 @@ struct EnglishView: View {
                             Spacer()
                         }
                     } else {
-                        Picker("Image style", selection: $showClean) {
+                        Picker("Image style", selection: $showTransparent) {
                             Text("Overlay").tag(false)
                             Text("Transparent").tag(true)
                         }
@@ -57,7 +57,7 @@ struct EnglishView: View {
                 .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 16))
                 .padding(.bottom, 5)
                 
-                OCRImageView(isClean: showClean)
+                OCRImageView(showTransparent: showTransparent)
                 
                 if let errorMessage = translator.errorMessage {
                     Text(errorMessage).foregroundStyle(.red)
