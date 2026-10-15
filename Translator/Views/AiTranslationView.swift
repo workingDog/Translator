@@ -10,7 +10,7 @@ import Translation
 import FoundationModels
 import Vision
 
-/*
+
 struct AiTranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
@@ -28,8 +28,8 @@ struct AiTranslationView: View {
                         Spacer()
                     }
                 }
-                
-                if let img = translator.selectedImage {
+
+                if let img = translator.selectedImageItem?.getImage() {
                     Image(uiImage: img).resizable()
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -56,10 +56,18 @@ struct AiTranslationView: View {
         }
         .task {
             translator.isProcessing = true
-            menu = await translator.doAiTranslation8()
+     //       menu = await translator.doAiTranslation()
+            
+            if let testSet: [NewOCRTextItem] = await translator.doAiTranslation() {
+                for item in testSet {
+                    print("---> item: \(item.english) -> \(item.engText)")
+                }
+                print()
+            }
+            
             translator.isProcessing = false
         }
     }
 
 }
-*/
+

@@ -6,6 +6,9 @@
 //
 import SwiftUI
 import SwiftData
+import FoundationModels
+import Vision
+
 
 
 @MainActor
@@ -91,4 +94,46 @@ nonisolated struct OCRTextItem: Identifiable, Codable {
 
 struct SavedOCRData: Codable {
     let items: [OCRTextItem]
+}
+
+@Generable
+struct MenuTranslation: Codable {
+    var sections: [MenuSection]
+}
+
+@Generable
+struct MenuSection: Codable {
+    var title: String
+    var items: [MenuItem]
+}
+
+@Generable
+struct MenuItem: Codable {
+    var japanese: String
+    var english: String
+    var description: String?
+    var price: String?
+}
+
+@Generable
+struct NewOCRTextItem: Identifiable, Codable {
+    let id: String
+    var text: String
+    var engText: String
+    var english: String
+    
+    init(id: String = UUID().uuidString, text: String, engText: String, english: String) {
+        self.id = id
+        self.text = text
+        self.engText = engText
+        self.english = english
+    }
+    
+    init(item: OCRTextItem) {
+        self.id = item.id.uuidString
+        self.text = item.text
+        self.engText = item.engText
+        self.english = item.engText
+    }
+    
 }

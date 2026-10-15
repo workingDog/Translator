@@ -7,6 +7,9 @@
 import SwiftUI
 import SwiftData
 import Translation
+import FoundationModels
+import Vision
+
 
 
 @MainActor
@@ -173,9 +176,159 @@ final class TranslatorModel {
         }
     }
     
+    //---------------AI-----------------------------
+    
+    func analyzeMenuOCR(_ items: [NewOCRTextItem]) async -> [NewOCRTextItem]? {
+        let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
+        
+        guard case .available = model.availability else { return nil }
+        
+        do {
+            let session = LanguageModelSession {
+"""
+You are an expert Japanese-to-English translator specializing in Japanese restaurant menus.
+Your task is to improve existing English translations using the original Japanese text as the authoritative source.
+For each entry:
+
+* Correct mistranslations and unnatural English.
+* Use natural, concise English appropriate for a restaurant menu.
+* Prefer established English names for Japanese dishes, ingredients, and cooking methods.
+* Use the existing English translation as a starting point, not as an authoritative translation.
+* Use the surrounding entries to understand the menu context when helpful.
+* Preserve the original meaning, including ingredients, preparation methods, quantities, and distinctions between dishes.
+* Do not add ingredients, descriptions, or details that are not supported by the Japanese.
+* Preserve prices, numbers, and other factual information exactly as they are.
+* Translate headings, labels, and short phrases naturally.
+* If the existing English is already accurate and appropriate, leave it unchanged.
+* If the Japanese is ambiguous, prefer a conservative translation rather than guessing.
+
+Return one improved English translation for each input entry in the "english" field, in exactly the same order. Do not modify any other field in the input items, only the "english" field.
+"""
+            }
+
+            let response = try await session.respond(generating: [NewOCRTextItem].self) {
+                "Improve the English translations of these Japanese restaurant menu entries."
+                "For each entry, use 'text' as the authoritative Japanese source and 'engText' as the existing English translation."
+                "Return the improved translation in 'english'. Preserve 'id', 'text', and 'engText' exactly."
+                "Return exactly \(items.count) entries in the same order."
+                "\(items)"
+            }
+
+            return response.content
+
+        } catch {
+            print("Menu analysis failed: \(error)")
+            return nil
+        }
+    }
+  
+    func doAiTranslation() async -> [NewOCRTextItem]? {
+        print("---> doAiTranslation ocrTextItems: \(ocrTextItems.count)\n")
+        var allItems: [NewOCRTextItem] = []
+        let batchSize = 20
+        
+        var count = 0
+        
+        let testSet = Array(ocrTextItems.prefix(40))
+        
+        for startIndex in stride(from: 0, to: testSet.count, by: batchSize) {
+            let endIndex = min(startIndex + batchSize, testSet.count)
+            let batch = testSet[startIndex..<endIndex].map { NewOCRTextItem(item: $0) }
+            if let translatedItems = await analyzeMenuOCR(Array(batch)) {
+                allItems.append(contentsOf: translatedItems)
+            }
+            count += batchSize
+            print("---> batch: \(count)\n")
+        }
+        return allItems.isEmpty ? nil : allItems
+    }
+    
 }
 
-//---------------AI-----------------------------
+/*
+ 
+ 
+ //  ポーニマメフク Poni Mamefuku
+ 
+ func doAiTranslation2() async -> [NewOCRTextItem]? {
+     print("---> doAiTranslation ocrTextItems: \(ocrTextItems.count)\n")
+     
+     var newItems: [NewOCRTextItem] = []
+     
+     let testSet = ocrTextItems
+     
+     for item in ocrTextItems {
+       //  print("---> item: \(item.text) \(item.engText)")
+         newItems.append(NewOCRTextItem(item: item))
+     }
+     print()
+     
+     if !newItems.isEmpty {
+         return await analyzeMenuOCR(newItems)
+     }
+     return nil
+ }
+ 
+ 
+ func analyzeMenuOCR(_ items: [OCRTextItem]) async -> MenuTranslation? {
+     let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
+     
+     guard case .available = model.availability else { return nil }
+     
+     do {
+         let session = LanguageModelSession {
+"""
+You are an expert Japanese menu translator.
+Translate the supplied Japanese OCR text into concise, natural English.
+Preserve every identifiable menu section, item, description, and price.
+Translate all headings into English.
+Never invent or omit identifiable menu items or prices.
+Use the bounding boxes to understand the reading order and group items into sections.
+Keep descriptions and prices separate from item names.
+"""
+         }
+         
+         let ocrText = items.map {
+             "Text: \($0.text), Bounding box: x=\($0.boundingBox.origin.x), y=\($0.boundingBox.origin.y), width=\($0.boundingBox.width), height=\($0.boundingBox.height)"
+         }.joined(separator: "\n")
+         
+         let response = try await session.respond(generating: MenuTranslation.self) {
+             "Translate the following Japanese menu OCR results into English. Preserve all sections and items:\n\(ocrText)"
+         }
+         
+         return response.content
+         
+     } catch {
+         print("Menu analysis failed: \(error)")
+         return nil
+     }
+ }
+ 
+ func doAiTranslation() async -> MenuTranslation? {
+     print("---> doAiTranslation ocrTextItems: \(ocrTextItems.count)\n")
+     
+     let testSet = Array(ocrTextItems.prefix(21))
+     
+     for item in testSet {
+         print("---> item: \(item.text) \(item.engText)")
+     }
+     print()
+     
+     if !testSet.isEmpty {
+         return await analyzeMenuOCR(testSet)
+     }
+     return nil
+ }
+ 
+ */
+
+
+
+
+
+
+
+
 /*
  func analyzeMenuImage(_ image: CGImage) async -> MenuTranslation? {
  let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)

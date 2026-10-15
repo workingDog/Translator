@@ -9,12 +9,19 @@ import SwiftData
 import Translation
 
 
+enum TransMode: String, CaseIterable {
+    case ocr
+    case ai
+}
+
 struct TranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
     @State private var isSaved = false
     @State private var isTranslated = false
+    
+//    @State private var mode: TransMode? = .ocr
     
     let menuid = UUID()
     let title = "Menu \(Int.random(in: 1...1000))"
@@ -23,58 +30,79 @@ struct TranslationView: View {
         ZStack {
             AppBackground().ignoresSafeArea()
             
-            EnglishView().padding(5)
-                .toolbar {
-                    
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            translator.saveTranslatedMenu(
-                                title: title,
-                                menuid: menuid,
-                                modelContext: modelContext)
-                        } label: {
-                            ZStack {
-                                Image(systemName: "star.fill").foregroundStyle(.yellow)
-                                Image(systemName: "star").foregroundStyle(.black)
-                            }
-                            .font(.title)
+            VStack(alignment: .leading, spacing: 5) {
+//                if mode == .ocr {
+                    EnglishView().padding(5)
+//                }
+                
+//                if mode == .ai {
+//                    AiTranslationView()
+//                }
+            }
+            .padding(10)
+            .padding(.top, 10)
+            
+            .toolbar {
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        translator.saveTranslatedMenu(
+                            title: title,
+                            menuid: menuid,
+                            modelContext: modelContext)
+                    } label: {
+                        ZStack {
+                            Image(systemName: "star.fill").foregroundStyle(.yellow)
+                            Image(systemName: "star").foregroundStyle(.black)
                         }
-                        .buttonStyle(.plain)
+                        .font(.title)
                     }
-                    
-                    ToolbarItem(placement: .principal) {
-                        Button {
-                            doTranslation()
-                        } label: {
-                            Image(systemName: "translate").font(.title)
-                        }
-                        .buttonStyle(.glass)
-                        .disabled(isTranslated)
-                    }
-                    
-                    ToolbarItem(placement: .bottomBar) {
-                        Button {
-                            translator.selectedImageItem?.isCorrected.toggle()
-                        } label: {
-                            Image(systemName: "perspective").font(.title2)
-                        }
-                        .disabled(isTranslated)
-                    }
-                    
-                    ToolbarItem(placement: .bottomBar) {
-                        Button {
-                            translator.selectedImageItem?.isRotated.toggle()
-                        } label: {
-                            Image(systemName: "rotate.right").font(.title2)
-                        }
-                        .disabled(isTranslated)
-                    }
-                    
-                    ToolbarItem(placement: .status) {
-                        Text(title)
-                    }
-                    
+                    .buttonStyle(.plain)
                 }
+                
+//                ToolbarItemGroup(placement: .topBarTrailing) {
+//                    Button("OCR") {
+//                        mode = .ocr
+//                    }.tint(mode == .ocr ? .blue : .primary)
+//                    
+//                    Button("AI") {
+//                        mode = .ai
+//                    }.tint(mode == .ai ? .blue : .primary)
+//                }
+                
+                ToolbarItem(placement: .principal) {
+                    Button {
+                        doTranslation()
+                    } label: {
+                        Image(systemName: "translate").font(.title)
+                    }
+                    .buttonStyle(.glass)
+                    .disabled(isTranslated)
+                }
+                
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        translator.selectedImageItem?.isCorrected.toggle()
+                    } label: {
+                        Image(systemName: "perspective").font(.title2)
+                    }
+                    .disabled(isTranslated)
+                }
+                
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        translator.selectedImageItem?.isRotated.toggle()
+                    } label: {
+                        Image(systemName: "rotate.right").font(.title2)
+                    }
+                    .disabled(isTranslated)
+                }
+                
+                ToolbarItem(placement: .status) {
+                    Text(title)
+                }
+                
+            }
         }
         // when translator.translationConfiguration changes, it will activate this task
         .translationTask(translator.translationConfiguration) { session in
