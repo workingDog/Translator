@@ -184,3 +184,19 @@ struct JMDictGloss: Decodable {
     let type: String?
 }
 
+/*
+ AltData
+ {"japanese":"アゴニスト","english":"AGONIST"},
+ 
+ 
+ menukata
+ { "japanese": "居酒屋", "furi": "居酒屋(いざかや)", "reading": "Izakaya", "english": "Izakaya (japanese pub)" },
+ 
+ menuWords
+ MenuWord
+ struct MenuWord: Codable {
+     let katakana: String
+     let english: String
+ }
+ 
+ */

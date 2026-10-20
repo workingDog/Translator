@@ -35,7 +35,12 @@ final class TranslatorModel {
     
     
     init() {
-        loadMenuData()
+        do {
+            loanwords = try loadLoanwords()
+            print("---> loanwords \(loanwords.count)")
+        } catch {
+            print("Failed to load loanwords: \(error)")
+        }
     }
     
     func resetTranslation() {
@@ -258,6 +263,7 @@ final class TranslatorModel {
         loadMenuKata()
         loadAltData()
         print("---> loanwords: \(loanwords.count)")
+     //   saveLoanwords()  // <--- create the combined dictionary
     }
     
     func loadMenuKata() {
@@ -317,7 +323,27 @@ final class TranslatorModel {
             return updatedItem
         }
     }
+    //--------------------------------------------
     
+    func loadLoanwords() throws -> [String: String] {
+        let url = Bundle.main.url(forResource: "loanwords", withExtension: "json")!
+        let data = try Data(contentsOf: url)
+        return try JSONDecoder().decode([String: String].self, from: data)
+    }
+    
+    func saveLoanwords() {
+        do {
+            let url = URL.documentsDirectory.appending(path: "loanwords.json")
+            let data = try JSONEncoder().encode(loanwords)
+            try data.write(to: url, options: .atomic)
+            print("---> Saved \(loanwords.count) loanwords to \(url.path)")
+        } catch{
+            print(error)
+        }
+    }
+    //--------------------------------------------
+    
+
     //---------------AI-----------------------------
     
     func analyzeMenuOCR1(_ items: [NewOCRTextItem]) async -> [NewOCRTextItem]? {
