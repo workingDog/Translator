@@ -19,6 +19,28 @@ extension String {
         trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
+    // The katakana block is primarily U+30A0...U+30FF
+    var containsKatakana: Bool {
+        unicodeScalars.contains { (0x30A0...0x30FF).contains($0.value) }
+    }
+    
+    var katakanaWords: [String] {
+        let pattern = "[\\u{30A0}-\\u{30FF}]+"
+        guard let regex = try? Regex(pattern) else { return [] }
+        return matches(of: regex).map { String(describing: $0) }
+    }
+    
+    /*
+     var katakanaWords: [String] {
+         let pattern = "[ァ-ヿー]+"
+         guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
+         let range = NSRange(startIndex..., in: self)
+         return regex.matches(in: self, range: range).compactMap {
+             Range($0.range, in: self).map { String(self[$0]) }
+         }
+     }
+     */
+    
 }
 
 extension UIImage {

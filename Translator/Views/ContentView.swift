@@ -128,6 +128,9 @@ struct ContentView: View {
             if let uimg = UIImage(named: "testSkew") {  // test5 testSkew
                 selectedImages.append(ImageItem(uimage: uimg))
             }
+   
+ //           doTest2()
+            
         }
         .task(id: selectedPhoto) {
             await loadSelectedPhoto()
@@ -218,5 +221,34 @@ struct ContentView: View {
             }
         }
     }
+    
+//    func doTest2() {
+//        do {
+//            let results = try translator.loadMenuWords()
+//            print("---> results: \(results.count)" )
+//            for item in results.prefix(10) {
+//                print("---> katakana: \(item.katakana) english: \(item.english) ")
+//            }
+//            print()
+//            try translator.saveMenuWords()
+//            print()
+//        } catch {
+//            print(error)
+//        }
+//    }
+    
+//    func doTest2() {
+//        do {
+//            try translator.loadMenuWords()
+//            print("---> loanwords: \(translator.loanwords.count)" )
+//            for item in translator.loanwords.prefix(10) {
+//                print("---> katakana: \(item.key) english: \(item.value) ")
+//            }
+//            print()
+//        } catch {
+//            print(error)
+//        }
+//    }
+    
     
 }

@@ -118,9 +118,9 @@ struct MenuItem: Codable {
 @Generable
 struct NewOCRTextItem: Identifiable, Codable {
     let id: String
-    var text: String
-    var engText: String
-    var english: String
+    var text: String  // <--- Japanese
+    var engText: String  // <--- from TranslationSession
+    var english: String  // <--- from LanguageModelSession
     
     init(id: String = UUID().uuidString, text: String, engText: String, english: String) {
         self.id = id
@@ -137,3 +137,50 @@ struct NewOCRTextItem: Identifiable, Codable {
     }
     
 }
+
+
+struct KataItem: Codable {
+    var japanese: String
+    var english: String
+    // var furi: String?
+    // var reading: String?
+}
+
+struct MenuWord: Codable {
+    let katakana: String
+    let english: String
+}
+
+
+struct JMDict: Decodable {
+    let words: [JMDictWord]
+}
+
+struct JMDictWord: Decodable {
+    let id: String
+    let kanji: [JMDictKanji]
+    let kana: [JMDictKana]
+    let sense: [JMDictSense]
+}
+
+struct JMDictKanji: Decodable {
+    let text: String
+    let common: Bool?
+}
+
+struct JMDictKana: Decodable {
+    let text: String
+    let common: Bool
+}
+
+struct JMDictSense: Decodable {
+    let field: [String]
+    let gloss: [JMDictGloss]
+}
+
+struct JMDictGloss: Decodable {
+    let lang: String
+    let text: String
+    let type: String?
+}
+

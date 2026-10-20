@@ -60,5 +60,5 @@ struct EnglishView: View {
             }
         }
     }
-    
+
 }

@@ -14,6 +14,69 @@ struct OCRTextOverlay: View {
     let imageSize: CGSize
     let containerSize: CGSize
     let verticalOffset: CGFloat
+    
+    private var scale: CGFloat {
+        min(containerSize.width / imageSize.width, containerSize.height / imageSize.height)
+    }
+    private var displayedSize: CGSize {
+        CGSize(width: imageSize.width * scale, height: imageSize.height * scale)
+    }
+    private var offsetX: CGFloat {
+        (containerSize.width - displayedSize.width) / 2
+    }
+    private var offsetY: CGFloat {
+        (containerSize.height - displayedSize.height) / 2
+    }
+    private var boxWidth: CGFloat {
+        item.boundingBox.width * displayedSize.width
+    }
+    private var boxHeight: CGFloat {
+        item.boundingBox.height * displayedSize.height
+    }
+//    private var x: CGFloat {
+//        offsetX + item.boundingBox.midX * displayedSize.width
+//    }
+    
+    private var x: CGFloat {
+        let originalX = offsetX + item.boundingBox.midX * displayedSize.width
+        return originalX + (item.boundingBox.midX - 0.5) * boxWidth * (translator.fontScale - 1)
+    }
+    
+    private var y: CGFloat {
+        offsetY + (1 - item.boundingBox.midY) * displayedSize.height
+    }
+    private var fontSize: CGFloat {
+        max(boxHeight * 0.72 * translator.fontScale, 8)
+    }
+    
+    var body: some View {
+        Text(item.engText)
+            .font(.system(size: fontSize))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .foregroundStyle(.primary)
+            .frame(
+                width: boxWidth * translator.fontScale + 8,
+                height: boxHeight * translator.fontScale + 4
+            )
+            .background {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(.background.opacity(0.92))
+            }
+            .position(x: x, y: y + verticalOffset)
+    }
+
+}
+
+
+
+struct OCRTextOverlay1: View {
+    @Environment(TranslatorModel.self) private var translator
+    
+    let item: OCRTextItem
+    let imageSize: CGSize
+    let containerSize: CGSize
+    let verticalOffset: CGFloat
 
     private var scale: CGFloat {
         min(containerSize.width / imageSize.width, containerSize.height / imageSize.height)

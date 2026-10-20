@@ -29,10 +29,14 @@ final class TranslatorModel {
     
     var ocrTextItems: [OCRTextItem] = []
     
+    var loanwords: [String: String] = [:]
+    
     @ObservationIgnored var ocrService = OCRService()
     
     
-    init() { }
+    init() {
+        loadMenuData()
+    }
     
     func resetTranslation() {
         japaneseText = ""
@@ -176,9 +180,147 @@ final class TranslatorModel {
         }
     }
     
+    //---------------katakana-----------------------------
+/*
+    func loadLoanwords() {
+        guard let url = Bundle.main.url(forResource: "menukata", withExtension: "json") else {
+            return
+        }
+        do {
+            let data = try Data(contentsOf: url)
+            let entries = try JSONDecoder().decode([KataItem].self, from: data)
+            loanwords = Dictionary(entries.map { ($0.japanese, $0.english) }, uniquingKeysWith: { first, _ in first })
+        } catch {
+            print(error)
+        }
+    }
+    
+    func getKatakanaWords(_ text: String) -> [String: String] {
+        Dictionary(
+            text.katakanaWords.compactMap { word in
+                loanwords[word].map { (word, $0) }
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
+    }
+    
+    func applyMenuDictionary() {
+        ocrTextItems = ocrTextItems.map { item in
+            guard let translation = loanwords[item.text] else {
+                return item
+            }
+            var updatedItem = item
+            updatedItem.engText = translation
+            return updatedItem
+        }
+    }
+    
+    func loadMenuWords1() throws -> [MenuWord] {
+        let words = try loadJMDict().words
+        var results: [MenuWord] = []
+        
+        for word in words {
+            let katakana = word.kana.map(\.text).filter { $0.range(of: "^[ァ-ヿー]+$", options: .regularExpression) != nil }
+            
+            guard !katakana.isEmpty else { continue }
+            
+            for sense in word.sense {
+                let english = sense.gloss.filter { $0.lang == "eng" }.map(\.text)
+                guard !english.isEmpty else { continue }
+                for spelling in katakana {
+                    results.append(MenuWord(katakana: spelling, english: english.joined(separator: "; ") ) )
+                }
+            }
+        }
+        
+        return results
+    }
+    
+    func loadJMDict() throws -> JMDict {
+        let url = Bundle.main.url(forResource: "jmdict-eng-3.6.2", withExtension: "json")!
+        return try JSONDecoder().decode(JMDict.self, from: Data(contentsOf: url))
+    }
+    
+    func saveMenuWords() throws {
+        let results = try loadMenuWords1()
+        let data = try JSONEncoder().encode(results)
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appending(path: "menuWords.json")
+        try data.write(to: url, options: .atomic)
+        print("Saved \(results.count) words to \(url.path)")
+    }
+    */
+    
+    //--------------------------------------------
+    
+    func loadMenuData() {
+        loadMenuWords()
+        loadMenuKata()
+        loadAltData()
+        print("---> loanwords: \(loanwords.count)")
+    }
+    
+    func loadMenuKata() {
+        guard let url = Bundle.main.url(forResource: "menukata", withExtension: "json") else {
+            return
+        }
+        do {
+            let data = try Data(contentsOf: url)
+            let entries = try JSONDecoder().decode([KataItem].self, from: data)
+            print("---> loadMenuKata: \(entries.count)")
+            for entry in entries {
+                loanwords[entry.japanese.trim()] = loanwords[entry.japanese] ?? entry.english.trim()
+            }
+        } catch {
+            print(error)
+        }
+    }
+
+    func loadMenuWords() {
+        do {
+            let url = Bundle.main.url(forResource: "menuWords", withExtension: "json")!
+            let results = try JSONDecoder().decode([MenuWord].self, from: Data(contentsOf: url))
+            print("---> loadMenuWords: \(results.count)")
+            loanwords = Dictionary(results.map {
+                // pick only the first english word
+                let theEnglishWord = $0.english.components(separatedBy: ";").first ?? $0.english
+                return ($0.katakana.trim(), theEnglishWord.trim())
+            }, uniquingKeysWith: { first, _ in first })
+        } catch {
+            print(error)
+        }
+    }
+
+    func loadAltData() {
+        do {
+            let url = Bundle.main.url(forResource: "AltData", withExtension: "json")!
+            let entries = try JSONDecoder().decode([KataItem].self, from: Data(contentsOf: url))
+            print("---> loadAltData: \(entries.count)")
+            for entry in entries {
+                loanwords[entry.japanese.trim()] = loanwords[entry.japanese] ?? entry.english.trim()
+            }
+        } catch {
+            print(error)
+        }
+    }
+
+    func applyMenuWords() {
+        ocrTextItems = ocrTextItems.map { item in
+            guard let translation = loanwords[item.text] else {
+                return item
+            }
+            var updatedItem = item
+            
+            print("---> text: \(item.text) english1: \(item.engText) english2: \(translation) ")
+            
+            updatedItem.engText = translation
+            return updatedItem
+        }
+    }
+    
     //---------------AI-----------------------------
     
-    func analyzeMenuOCR(_ items: [NewOCRTextItem]) async -> [NewOCRTextItem]? {
+    func analyzeMenuOCR1(_ items: [NewOCRTextItem]) async -> [NewOCRTextItem]? {
         let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
         
         guard case .available = model.availability else { return nil }
@@ -222,7 +364,7 @@ Return one improved English translation for each input entry in the "english" fi
         }
     }
   
-    func doAiTranslation() async -> [NewOCRTextItem]? {
+    func doAiTranslation1() async -> [NewOCRTextItem]? {
         print("---> doAiTranslation ocrTextItems: \(ocrTextItems.count)\n")
         var allItems: [NewOCRTextItem] = []
         let batchSize = 20
@@ -240,6 +382,61 @@ Return one improved English translation for each input entry in the "english" fi
             count += batchSize
             print("---> batch: \(count)\n")
         }
+        return allItems.isEmpty ? nil : allItems
+    }
+    
+    
+    
+    func analyzeMenuOCR(_ items: [NewOCRTextItem]) async -> [NewOCRTextItem]? {
+        let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)
+        guard case .available = model.availability else { return nil }
+        do {
+            let session = LanguageModelSession {
+                """
+                You are an expert in Japanese food terminology and Japanese-to-English translation.
+                Improve the English translations of Japanese restaurant menu entries containing katakana.
+                The Japanese 'text' is the authoritative source. The existing 'engText' is a machine translation that may be incorrect.
+                Identify katakana loanwords and determine their intended meaning in the context of Japanese cuisine.
+                Prefer natural English food names over literal transliterations.
+                Recognize Japanese culinary terms whose meanings differ from their literal translations.
+                Do not invent ingredients or preparation methods.
+                Preserve 'id', 'text', and 'engText' exactly.
+                Return the corrected translation in 'english'.
+                """
+            }
+            let response = try await session.respond(generating: [NewOCRTextItem].self) {
+                "Review these Japanese restaurant menu entries and improve their English translations."
+                "Return exactly \(items.count) entries in the same order."
+                "\(items)"
+            }
+            return response.content
+        } catch {
+            print("Menu analysis failed: \(error)")
+            return nil
+        }
+    }
+    
+    func doAiTranslation() async -> [NewOCRTextItem]? {
+        let items = ocrTextItems.filter { !$0.text.katakanaWords.isEmpty }
+        
+        print("---> doAiTranslation() items: \(items.count)")
+        
+        guard !items.isEmpty else { return nil }
+        
+        var allItems: [NewOCRTextItem] = []
+        
+        let batchSize = 20
+        
+        for startIndex in stride(from: 0, to: items.count, by: batchSize) {
+            let endIndex = min(startIndex + batchSize, items.count)
+            let batch = items[startIndex..<endIndex].map { NewOCRTextItem(item: $0) }
+            
+            if let translatedItems = await analyzeMenuOCR(Array(batch)) {
+                allItems.append(contentsOf: translatedItems)
+            }
+            
+        }
+
         return allItems.isEmpty ? nil : allItems
     }
     

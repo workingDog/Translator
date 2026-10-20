@@ -21,7 +21,7 @@ struct TranslationView: View {
     @State private var isSaved = false
     @State private var isTranslated = false
     
-//    @State private var mode: TransMode? = .ocr
+    @State private var mode: TransMode? = .ocr
     
     let menuid = UUID()
     let title = "Menu \(Int.random(in: 1...1000))"
@@ -108,6 +108,9 @@ struct TranslationView: View {
         .translationTask(translator.translationConfiguration) { session in
             translator.isProcessing = true
             await translator.translateOCRItems(using: session)
+            print("\n---> translateOCRItems done")
+            translator.applyMenuWords()
+            print("---> applyMenuWords done\n")
             translator.isProcessing = false
         }
     }
