@@ -25,16 +25,17 @@ struct AiTranslationView: View {
                 if translator.isProcessing {
                     HStack {
                         Spacer()
-                        ProgressView()
+                        ProgressView().controlSize(.large)
                         Spacer()
                     }
                 }
-                if let img = translator.selectedImageItem?.getImage() {
-                    Image(uiImage: img)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: .infinity)
-                }
+                
+//                if let img = translator.selectedImageItem?.getImage() {
+//                    Image(uiImage: img)
+//                        .resizable()
+//                        .aspectRatio(contentMode: .fit)
+//                        .frame(maxWidth: .infinity)
+//                }
                 
                 ForEach(sections, id: \.self) { section in
                     Divider()
