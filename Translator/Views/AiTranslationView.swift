@@ -11,13 +11,12 @@ struct AiTranslationView: View {
     @Environment(TranslatorModel.self) private var translator
     
     private var sections: [String] {
-        var result: [String] = []
-        for item in translator.menuItems.sorted(by: { ($0.order ?? 0) < ($1.order ?? 0) }) {
-            if !result.contains(item.section) {
-                result.append(item.section)
+        var seen: Set<String> = []
+        return translator.menuItems
+            .sorted { ($0.order ?? 0) < ($1.order ?? 0) }
+            .compactMap { item in
+                seen.insert(item.section).inserted ? item.section : nil
             }
-        }
-        return result
     }
     
     var body: some View {
