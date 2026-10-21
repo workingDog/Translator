@@ -168,8 +168,6 @@ struct SavedMenuView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(item.english)
                                     Text(item.japanese)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
                                 }
                                 
                                 Spacer()
