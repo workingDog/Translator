@@ -18,7 +18,7 @@ struct TranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
-    @State private var mode: TransMode? = .ocr
+    @State private var mode: TransMode? = .ai
     
     let menuid = UUID()
     let title = "Menu \(Int.random(in: 1...1000))"
@@ -51,7 +51,7 @@ struct TranslationView: View {
                             Image(systemName: "star.fill").foregroundStyle(.yellow)
                             Image(systemName: "star").foregroundStyle(.black)
                         }
-                        .font(.title)
+                        .font(.title2)
                     }
                     .buttonStyle(.plain)
                     .disabled(translator.isProcessing)
