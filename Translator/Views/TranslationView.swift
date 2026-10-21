@@ -18,9 +18,6 @@ struct TranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
-    @State private var isSaved = false
-    @State private var isTranslated = false
-    
     @State private var mode: TransMode? = .ocr
     
     let menuid = UUID()
@@ -57,6 +54,7 @@ struct TranslationView: View {
                         .font(.title)
                     }
                     .buttonStyle(.plain)
+                    .disabled(translator.isProcessing)
                 }
                 
                 ToolbarItemGroup(placement: .topBarTrailing) {

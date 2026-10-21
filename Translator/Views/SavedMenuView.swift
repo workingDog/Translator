@@ -125,7 +125,6 @@ struct SavedMenuView: View {
                 let imagin = showClean ? UIImage(size: image.size) : image
                 
                 ZoomableImageView(image: imagin, items: savedOCRData?.items ?? [])
-                
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .zIndex(0)
                     .clipped()
