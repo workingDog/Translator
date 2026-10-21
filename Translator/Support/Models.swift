@@ -64,15 +64,15 @@ final class TranslatedMenu {
     var title: String
     var imageData: Data
     var ocrData: Data?
-    var extraData: Data?
+    var aiData: Data?
     var createdAt: Date
 
-    init(menuid: UUID, title: String, imageData: Data, ocrData: Data, extraData: Data? = nil) {
+    init(menuid: UUID, title: String, imageData: Data, ocrData: Data, aiData: Data? = nil) {
         self.menuid = menuid
         self.title = title
         self.imageData = imageData
         self.ocrData = ocrData
-        self.extraData = extraData
+        self.aiData = aiData
         self.createdAt = .now
     }
 
@@ -80,13 +80,13 @@ final class TranslatedMenu {
 
 nonisolated struct OCRTextItem: Identifiable, Codable {
     let id: UUID
-    var text: String
+    var jaText: String
     var engText: String
     var boundingBox: CGRect
     
-    init(id: UUID = UUID(), text: String, engText: String, boundingBox: CGRect) {
+    init(id: UUID = UUID(), jaText: String, engText: String, boundingBox: CGRect) {
         self.id = id
-        self.text = text
+        self.jaText = jaText
         self.engText = engText
         self.boundingBox = boundingBox
     }
@@ -94,6 +94,10 @@ nonisolated struct OCRTextItem: Identifiable, Codable {
 
 struct SavedOCRData: Codable {
     let items: [OCRTextItem]
+}
+
+struct SavedAiData: Codable {
+    let items: [MenuItem]
 }
 
 @Generable
@@ -108,34 +112,39 @@ struct MenuSection: Codable {
 }
 
 @Generable
-struct MenuItem: Codable {
-    var japanese: String
-    var english: String
-    var description: String?
-    var price: String?
+struct MenuItem: Identifiable, Codable {
+    let id = UUID()
+    
+    var section: String     // <--- section title in English
+    var japanese: String    // <--- original Japanese
+    var english: String     // <--- translated English
+    var price: String?      // <--- price of the item if available
+    var order: Int?         // <--- order in the list if need be
+    
+    init(section: String, japanese: String, english: String, price: String?, order: Int?) {
+        self.section = section
+        self.japanese = japanese
+        self.english = english
+        self.price = price
+        self.order = order
+    }
+    
+    init(ai: AIMenuItem, english: String) {
+        self.section = ai.section
+        self.japanese = ai.japanese
+        self.english = english
+        self.price = ai.price
+        self.order = ai.order
+    }
+ 
 }
 
 @Generable
-struct NewOCRTextItem: Identifiable, Codable {
-    let id: String
-    var text: String  // <--- Japanese
-    var engText: String  // <--- from TranslationSession
-    var english: String  // <--- from LanguageModelSession
-    
-    init(id: String = UUID().uuidString, text: String, engText: String, english: String) {
-        self.id = id
-        self.text = text
-        self.engText = engText
-        self.english = english
-    }
-    
-    init(item: OCRTextItem) {
-        self.id = item.id.uuidString
-        self.text = item.text
-        self.engText = item.engText
-        self.english = item.engText
-    }
-    
+struct AIMenuItem {
+    var section: String
+    var japanese: String
+    var price: String?
+    var order: Int?
 }
 
 

@@ -148,7 +148,7 @@ extension Array where Element == OCRTextItem {
         }
         return lines.map { line in
             line.sorted { $0.boundingBox.minX < $1.boundingBox.minX }
-                .map(\.text)
+                .map(\.jaText)
                 .joined(separator: " ")
         }.joined(separator: "\n")
     }

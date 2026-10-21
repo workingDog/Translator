@@ -30,9 +30,9 @@ struct OCRService {
             
             return (request.results ?? []).compactMap { observation -> OCRTextItem? in
                 guard let text = observation.topCandidates(1).first?.string else { return nil }
-                // initially engText = text, the Japanese text
+                // initially engText = jaText, the Japanese text
                 return OCRTextItem(
-                    text: text,
+                    jaText: text,
                     engText: text,
                     boundingBox: observation.boundingBox
                 )

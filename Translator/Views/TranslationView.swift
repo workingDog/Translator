@@ -31,13 +31,12 @@ struct TranslationView: View {
             AppBackground().ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 5) {
-//                if mode == .ocr {
+                if mode == .ocr {
                     EnglishView().padding(5)
-//                }
-                
-//                if mode == .ai {
-//                    AiTranslationView()
-//                }
+                }
+                if mode == .ai {
+                    AiTranslationView()
+                }
             }
             .padding(10)
             .padding(.top, 10)
@@ -60,16 +59,18 @@ struct TranslationView: View {
                     .buttonStyle(.plain)
                 }
                 
-//                ToolbarItemGroup(placement: .topBarTrailing) {
-//                    Button("OCR") {
-//                        mode = .ocr
-//                    }.tint(mode == .ocr ? .blue : .primary)
-//                    
-//                    Button("AI") {
-//                        mode = .ai
-//                    }.tint(mode == .ai ? .blue : .primary)
-//                }
-                
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button("OCR") {
+                        mode = .ocr
+                    }.tint(mode == .ocr ? .blue : .primary)
+                    .disabled(translator.isProcessing)
+                    
+                    Button("AI") {
+                        mode = .ai
+                    }.tint(mode == .ai ? .blue : .primary)
+                    .disabled(translator.isProcessing)
+                }
+
                 ToolbarItem(placement: .principal) {
                     Button {
                         doTranslation()
@@ -77,7 +78,7 @@ struct TranslationView: View {
                         Image(systemName: "translate").font(.title)
                     }
                     .buttonStyle(.glass)
-                    .disabled(isTranslated)
+                    .disabled(translator.isProcessing)
                 }
                 
                 ToolbarItem(placement: .bottomBar) {
@@ -86,7 +87,7 @@ struct TranslationView: View {
                     } label: {
                         Image(systemName: "perspective").font(.title2)
                     }
-                    .disabled(isTranslated)
+                    .disabled(translator.isProcessing)
                 }
                 
                 ToolbarItem(placement: .bottomBar) {
@@ -95,7 +96,7 @@ struct TranslationView: View {
                     } label: {
                         Image(systemName: "rotate.right").font(.title2)
                     }
-                    .disabled(isTranslated)
+                    .disabled(translator.isProcessing)
                 }
                 
                 ToolbarItem(placement: .status) {
@@ -107,26 +108,36 @@ struct TranslationView: View {
         // when translator.translationConfiguration changes, it will activate this task
         .translationTask(translator.translationConfiguration) { session in
             translator.isProcessing = true
-            await translator.translateOCRItems(using: session)
-            print("\n---> translateOCRItems done")
-            translator.applyMenuWords()
-            print("---> applyMenuWords done\n")
-            translator.isProcessing = false
+            defer { translator.isProcessing = false }
+
+            if mode == .ocr {
+                await translator.translateOCRItems(using: session)
+                translator.applyMenuWords()
+            } else {
+                await translator.doAiProcess(using: session)
+                translator.applyMenuWordsToAi()
+            }
         }
+        
     }
     
     func doTranslation() {
         Task {
             translator.isProcessing = true
-            // do OCR
-            await translator.doRecognition()
-            // activate .translationTask(...) for translation
-            translator.translationConfiguration = TranslationSession.Configuration(
-                source: Locale.Language(identifier: "ja"),
-                target: Locale.Language(identifier: "en"),
-                preferredStrategy: .highFidelity
-            )
-            isTranslated = true
+            if mode == .ocr {
+                await translator.doRecognition()
+            }
+            translator.isProcessing = false
+
+            if translator.translationConfiguration == nil {
+                translator.translationConfiguration = TranslationSession.Configuration(
+                    source: Locale.Language(identifier: "ja"),
+                    target: Locale.Language(identifier: "en"),
+                    preferredStrategy: .highFidelity
+                )
+            } else {
+                translator.translationConfiguration?.invalidate()
+            }
         }
     }
     

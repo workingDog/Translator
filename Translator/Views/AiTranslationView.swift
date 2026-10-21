@@ -5,18 +5,20 @@
 //  Created by Ringo Wathelet on 2026/10/08.
 //
 import SwiftUI
-import SwiftData
-import Translation
-import FoundationModels
-import Vision
 
 
 struct AiTranslationView: View {
-    @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
-
-    @State private var menu: MenuTranslation?
     
+    private var sections: [String] {
+        var result: [String] = []
+        for item in translator.menuItems.sorted(by: { ($0.order ?? 0) < ($1.order ?? 0) }) {
+            if !result.contains(item.section) {
+                result.append(item.section)
+            }
+        }
+        return result
+    }
     
     var body: some View {
         ScrollView {
@@ -28,46 +30,39 @@ struct AiTranslationView: View {
                         Spacer()
                     }
                 }
-
                 if let img = translator.selectedImageItem?.getImage() {
-                    Image(uiImage: img).resizable()
+                    Image(uiImage: img)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(maxWidth: .infinity)
                 }
                 
-                if let menu {
-                    ForEach(menu.sections.indices, id: \.self) { sectionIndex in
-                        Divider()
-                        let section = menu.sections[sectionIndex]
-                        Text(section.title).font(.title2).bold()
-                        ForEach(section.items.indices, id: \.self) { itemIndex in
-                            let item = section.items[itemIndex]
-                            HStack {
+                ForEach(sections, id: \.self) { section in
+                    Divider()
+                    
+                    Text(section).font(.title2).bold()
+                    
+                    ForEach(translator.menuItems.filter { $0.section == section }.sorted { ($0.order ?? 0) < ($1.order ?? 0) }, id: \.japanese) { item in
+                        
+                        HStack(alignment: .firstTextBaseline) {
+                            VStack(alignment: .leading, spacing: 2) {
                                 Text(item.english)
-                                Spacer()
-                                Text(item.price ?? "")
+                                Text(item.japanese)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
+                            
+                            Spacer()
+                            
+                            if let price = item.price, !price.isEmpty {
+                                Text(price)
+                            }
+                            
                         }
                     }
                 }
             }
             .padding(10)
         }
-        .task {
-            translator.isProcessing = true
-     //       menu = await translator.doAiTranslation()
-            
-            if let testSet: [NewOCRTextItem] = await translator.doAiTranslation() {
-                for item in testSet {
-                    print("---> item: \(item.english) -> \(item.engText)")
-                }
-                print()
-            }
-            
-            translator.isProcessing = false
-        }
     }
-
 }
-
