@@ -49,6 +49,7 @@ final class TranslatorModel {
         japaneseText = ""
         englishText = ""
         ocrTextItems = []
+        menuItems = []
         errorMessage = nil
         isProcessing = false
         translationConfiguration = nil
