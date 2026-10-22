@@ -18,7 +18,7 @@ struct TranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
-    @State private var mode: TransMode? = .ai
+    @State private var mode: TransMode? = .ocr
     
     let menuid = UUID()
     let title = "Menu \(Int.random(in: 1...1000))"
@@ -73,7 +73,11 @@ struct TranslationView: View {
                     Button {
                         doTranslation()
                     } label: {
-                        Image(systemName: "translate").font(.title)
+                        VStack {
+                            Image(systemName: "translate")
+                            Text(mode?.rawValue ?? "")
+                        }
+                        .font(.title3)
                     }
                     .buttonStyle(.glass)
                     .disabled(translator.isProcessing)

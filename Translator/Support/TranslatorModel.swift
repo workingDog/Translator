@@ -28,18 +28,22 @@ final class TranslatorModel {
     var translationConfiguration: TranslationSession.Configuration?
     
     var ocrTextItems: [OCRTextItem] = []
-    
     var menuItems: [MenuItem] = []
-    
-    var loanwords: [String: String] = [:]
+    var katakanawords: [String: String] = [:]
     
     @ObservationIgnored var ocrService = OCRService()
     
     
     init() {
         do {
-            loanwords = try loadLoanwords()
-            print("---> loanwords \(loanwords.count)")
+            katakanawords = try loadAllwords() //combineData() loadGoogleData() loadKatakanawords()
+            print("---> katakanawords \(katakanawords.count)")
+            
+//            for item in katakanawords.prefix(100) {
+//                print("---> key: \(item.key)  value: \(item.value) ")
+//            }
+//            print()
+            
         } catch {
             print("Failed to load loanwords: \(error)")
         }
@@ -269,7 +273,7 @@ final class TranslatorModel {
         loadMenuWords()
         loadMenuKata()
         loadAltData()
-        print("---> loanwords: \(loanwords.count)")
+        print("---> loanwords: \(katakanawords.count)")
      //   saveLoanwords()  // <--- create the combined dictionary
     }
     
@@ -282,7 +286,7 @@ final class TranslatorModel {
             let entries = try JSONDecoder().decode([KataItem].self, from: data)
             print("---> loadMenuKata: \(entries.count)")
             for entry in entries {
-                loanwords[entry.japanese.trim()] = loanwords[entry.japanese] ?? entry.english.trim()
+                katakanawords[entry.japanese.trim()] = katakanawords[entry.japanese] ?? entry.english.trim()
             }
         } catch {
             print(error)
@@ -294,7 +298,7 @@ final class TranslatorModel {
             let url = Bundle.main.url(forResource: "menuWords", withExtension: "json")!
             let results = try JSONDecoder().decode([MenuWord].self, from: Data(contentsOf: url))
             print("---> loadMenuWords: \(results.count)")
-            loanwords = Dictionary(results.map {
+            katakanawords = Dictionary(results.map {
                 // pick only the first english word
                 let theEnglishWord = $0.english.components(separatedBy: ";").first ?? $0.english
                 return ($0.katakana.trim(), theEnglishWord.trim())
@@ -310,7 +314,7 @@ final class TranslatorModel {
             let entries = try JSONDecoder().decode([KataItem].self, from: Data(contentsOf: url))
             print("---> loadAltData: \(entries.count)")
             for entry in entries {
-                loanwords[entry.japanese.trim()] = loanwords[entry.japanese] ?? entry.english.trim()
+                katakanawords[entry.japanese.trim()] = katakanawords[entry.japanese] ?? entry.english.trim()
             }
         } catch {
             print(error)
@@ -319,7 +323,7 @@ final class TranslatorModel {
 
     func applyMenuWords() {
         ocrTextItems = ocrTextItems.map { item in
-            guard let translation = loanwords[item.jaText] else {
+            guard let translation = katakanawords[item.jaText] else {
                 return item
             }
             var updatedItem = item
@@ -334,7 +338,7 @@ final class TranslatorModel {
     func applyMenuWordsToAi() {
         menuItems = menuItems.map { item in
             var updatedItem = item
-            guard let translation = loanwords[item.japanese] else {
+            guard let translation = katakanawords[item.japanese] else {
                 return item
             }
             updatedItem.english = translation
@@ -347,31 +351,104 @@ final class TranslatorModel {
     
     //--------------------------------------------
     
-    func loadLoanwords() throws -> [String: String] {
-        let url = Bundle.main.url(forResource: "loanwords", withExtension: "json")!
+    func loadKatakanawords() throws -> [String: String] {
+        let url = Bundle.main.url(forResource: "katakanawords", withExtension: "json")!
         let data = try Data(contentsOf: url)
         
 //        let resutls = try JSONDecoder().decode([String: String].self, from: data)
 //        print("---> resutls: \(resutls.count)" )
 //        for item in resutls.prefix(50) {
-//            print("---> key: \(item.key) value: \(item.value) ")
+//            print("---> key: \(item.key)  value: \(item.value) ")
 //        }
 //        print()
 
         return try JSONDecoder().decode([String: String].self, from: data)
     }
-    
-    func saveLoanwords() {
+
+    func saveKatakanawords() {
         do {
-            let url = URL.documentsDirectory.appending(path: "loanwords.json")
-            let data = try JSONEncoder().encode(loanwords)
+            let url = URL.documentsDirectory.appending(path: "katakanawords.json")
+            let data = try JSONEncoder().encode(katakanawords)
             try data.write(to: url, options: .atomic)
-            print("---> Saved \(loanwords.count) loanwords to \(url.path)")
+            print("---> Saved \(katakanawords.count) loanwords to \(url.path)")
         } catch{
             print(error)
         }
     }
     //--------------------------------------------
+    //--------------------------------------------
+    
+    func loadGoogleData() throws -> [String: String] {
+        let url = Bundle.main.url(forResource: "fullkatakana", withExtension: "txt")!
+        
+        var words: [String: String] = [:]
+        
+        let contents = try String(contentsOf: url, encoding: .utf8)
+        
+        for line in contents.components(separatedBy: .newlines) {
+            let columns = line.components(separatedBy: "\t")
+            guard columns.count >= 4 else { continue }
+            let english = columns[1].trim()
+            let katakana = columns[3].trim()
+            guard !english.isEmpty, !katakana.isEmpty else { continue }
+            if let existing = words[katakana] {
+                if !existing.components(separatedBy: "; ").contains(english) {
+                    words[katakana] = "\(existing); \(english)"
+                }
+            } else {
+                words[katakana] = english
+            }
+        }
+
+//        print("\n---> loadGoogleData words: \(words.count)" )
+//        for item in words.prefix(50) {
+//            print("---> key: \(item.key)  value: \(item.value) ")
+//        }
+//        print()
+        
+        return words
+    }
+    
+    func combineData() throws -> [String:String] {
+        var dicwords = try loadKatakanawords()
+        let googlewords = try loadGoogleData()
+        for (key, value) in googlewords where dicwords[key] == nil {
+            dicwords[key] = value
+        }
+        return dicwords
+    }
+    
+    // remove the ";" in the English text
+    func modAllwords() throws -> [String: String] {
+        let url = Bundle.main.url(forResource: "katakana-eng", withExtension: "json")!
+        let data = try Data(contentsOf: url)
+        var temp = try JSONDecoder().decode([String: String].self, from: data)
+        for (key, value) in temp {
+            temp[key] = value.components(separatedBy: "; ").first ?? value
+        }
+        return temp
+    }
+    
+    func loadAllwords() throws -> [String: String] {
+        let url = Bundle.main.url(forResource: "katakana-eng", withExtension: "json")!
+        let data = try Data(contentsOf: url)
+        return try JSONDecoder().decode([String: String].self, from: data)
+    }
+    
+    func saveCombined() {
+        do {
+            let url = URL.documentsDirectory.appending(path: "katakana-eng2.json")
+            let data = try JSONEncoder().encode(katakanawords)
+            try data.write(to: url, options: .atomic)
+            print("---> Saved \(katakanawords.count) loanwords to \(url.path)")
+        } catch{
+            print(error)
+        }
+    }
+
+    //--------------------------------------------
+    //--------------------------------------------
+    
     
 
     //---------------AI-----------------------------

@@ -70,7 +70,7 @@ struct SavedMenuView: View {
         }
     }
     
-    func decodeMenu(_ menu: TranslatedMenu) -> SavedOCRData? {
+    func decodeOCRMenu(_ menu: TranslatedMenu) -> SavedOCRData? {
         return menu.ocrData.flatMap { try? JSONDecoder().decode(SavedOCRData.self, from: $0) }
     }
     
@@ -82,7 +82,7 @@ struct SavedMenuView: View {
     func orcView(image: UIImage) -> some View {
         @Bindable var translator = translator
         
-        let savedOCRData = decodeMenu(menu)
+        let savedOCRData = decodeOCRMenu(menu)
         
         GeometryReader { geometry in
             VStack(alignment: .leading, spacing: 10) {
@@ -153,7 +153,7 @@ struct SavedMenuView: View {
             return result
         }
         
-        if let savedAiData {
+        if let savedAiData, !savedAiData.items.isEmpty {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     
@@ -183,7 +183,7 @@ struct SavedMenuView: View {
                 .padding(10)
             }
         } else {
-            Text("no info available")
+            Text("No data available").font(.title)
         }
     }
     
