@@ -36,14 +36,7 @@ final class TranslatorModel {
     
     init() {
         do {
-            katakanawords = try loadAllwords() //combineData() loadGoogleData() loadKatakanawords()
-//            print("---> katakanawords \(katakanawords.count)")
-            
-//            for item in katakanawords.prefix(100) {
-//                print("---> key: \(item.key)  value: \(item.value) ")
-//            }
-//            print()
-            
+            katakanawords = try loadAllwords()
         } catch {
             print("Failed to load loanwords: \(error)")
         }
@@ -134,28 +127,16 @@ final class TranslatorModel {
     }
     
     func translateOCRItems(using session: TranslationSession) async {
-        var theItems: [OCRTextItem] = []
-        
         let requests = ocrTextItems.map {
             TranslationSession.Request(sourceText: $0.jaText)
         }
         do {
             let responses = try await session.translations(from: requests)
-            
-            for (item, response) in zip(ocrTextItems, responses) {
-                theItems.append(
-                    OCRTextItem(
-                        id: item.id,
-                        jaText: item.jaText,
-                        engText: response.targetText,
-                        boundingBox: item.boundingBox)
-                )
+            ocrTextItems = zip(ocrTextItems, responses).map { item, response in
+                var updatedItem = item
+                updatedItem.engText = katakanawords[item.jaText] ?? response.targetText
+                return updatedItem
             }
-
-            ocrTextItems = theItems
-            
-            applyMenuWords()
-            
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -323,34 +304,6 @@ final class TranslatorModel {
         }
     }
 
-    func applyMenuWords() {
-        ocrTextItems = ocrTextItems.map { item in
-            guard let translation = katakanawords[item.jaText] else {
-                return item
-            }
-            var updatedItem = item
-            
- // print("---> text: \(item.jaText) english1: \(item.engText) english2: \(translation) ")
-            
-            updatedItem.engText = translation
-            return updatedItem
-        }
-    }
-    
-    func applyMenuWordsToAi() {
-        menuItems = menuItems.map { item in
-            var updatedItem = item
-            guard let translation = katakanawords[item.japanese] else {
-                return item
-            }
-            updatedItem.english = translation
- 
-// print("---> text: \(item.japanese) eng1: \(item.english) eng2: \(translation)")
-
-            return updatedItem
-        }
-    }
-    
     //--------------------------------------------
     
     func loadKatakanawords() throws -> [String: String] {
@@ -582,19 +535,16 @@ final class TranslatorModel {
                 return MenuItem(
                     section: translations[index].targetText,
                     japanese: item.japanese,
-                    english: translations[index + 1].targetText,
+                    english: katakanawords[item.japanese] ?? translations[index + 1].targetText,
                     price: item.price,
                     order: item.order
                 )
             }
-            
-            applyMenuWordsToAi()
-            
         } catch {
             print("Menu translation failed: \(error)")
         }
     }
-
+    
 }
 
 
