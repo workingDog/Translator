@@ -114,15 +114,13 @@ struct TranslationView: View {
 
             if mode == .ocr {
                 await translator.translateOCRItems(using: session)
-                translator.applyMenuWords()
             } else {
                 await translator.doAiProcess(using: session)
-                translator.applyMenuWordsToAi()
             }
         }
         
     }
-    
+
     func doTranslation() {
         Task {
             translator.isProcessing = true

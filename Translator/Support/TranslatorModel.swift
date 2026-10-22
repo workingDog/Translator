@@ -37,7 +37,7 @@ final class TranslatorModel {
     init() {
         do {
             katakanawords = try loadAllwords() //combineData() loadGoogleData() loadKatakanawords()
-            print("---> katakanawords \(katakanawords.count)")
+//            print("---> katakanawords \(katakanawords.count)")
             
 //            for item in katakanawords.prefix(100) {
 //                print("---> key: \(item.key)  value: \(item.value) ")
@@ -151,8 +151,10 @@ final class TranslatorModel {
                         boundingBox: item.boundingBox)
                 )
             }
-            
+
             ocrTextItems = theItems
+            
+            applyMenuWords()
             
         } catch {
             errorMessage = error.localizedDescription
@@ -328,7 +330,7 @@ final class TranslatorModel {
             }
             var updatedItem = item
             
- //           print("---> text: \(item.jaText) english1: \(item.engText) english2: \(translation) ")
+ // print("---> text: \(item.jaText) english1: \(item.engText) english2: \(translation) ")
             
             updatedItem.engText = translation
             return updatedItem
@@ -343,7 +345,7 @@ final class TranslatorModel {
             }
             updatedItem.english = translation
  
-  //          print("---> text: \(item.japanese) eng1: \(item.english) eng2: \(translation)")
+// print("---> text: \(item.japanese) eng1: \(item.english) eng2: \(translation)")
 
             return updatedItem
         }
@@ -585,6 +587,9 @@ final class TranslatorModel {
                     order: item.order
                 )
             }
+            
+            applyMenuWordsToAi()
+            
         } catch {
             print("Menu translation failed: \(error)")
         }
