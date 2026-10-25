@@ -120,8 +120,29 @@ struct TranslationView: View {
         }
         
     }
-
+    
     func doTranslation() {
+        Task {
+            translator.isProcessing = true
+            if mode == .ocr {
+                await translator.doRecognition()
+                if translator.translationConfiguration == nil {
+                    translator.translationConfiguration = TranslationSession.Configuration(
+                        source: Locale.Language(identifier: "ja"),
+                        target: Locale.Language(identifier: "en"),
+                        preferredStrategy: .highFidelity
+                    )
+                } else {
+                    translator.translationConfiguration?.invalidate()
+                }
+            } else {
+                await translator.doAiTranslate()
+            }
+            translator.isProcessing = false
+        }
+    }
+
+    func doTranslation1() {
         Task {
             translator.isProcessing = true
             if mode == .ocr {

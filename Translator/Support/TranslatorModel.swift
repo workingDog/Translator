@@ -9,7 +9,7 @@ import SwiftData
 import Translation
 import FoundationModels
 import Vision
-
+import ImageUnderstanding
 
 
 @MainActor
@@ -545,14 +545,75 @@ final class TranslatorModel {
         }
     }
     
+    func doAiTranslate() async {
+        guard let image = selectedImageItem?.uimage else { return }
+        let resizedImage = image.resizedToMaximumDimension(2500)
+        guard let imageData = resizedImage.jpegData(compressionQuality: 0.9) else { return }
+        let imageURL = FileManager.default.temporaryDirectory.appending(path: "\(UUID().uuidString).jpg")
+        
+        do {
+            try imageData.write(to: imageURL, options: .atomic)
+            
+            defer { try? FileManager.default.removeItem(at: imageURL) }
+            
+            let schema = """
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "section": {
+                    "type": "string",
+                    "description": "Section title in English"
+                  },
+                  "japanese": {
+                    "type": "string",
+                    "description": "Original Japanese menu item"
+                  },
+                  "english": {
+                    "type": "string",
+                    "description": "Translated English menu item"
+                  },
+                  "price": {
+                    "type": "string",
+                    "description": "Price of the item, if available"
+                  },
+                  "order": {
+                    "type": "integer",
+                    "description": "Order of the item in the list, if applicable"
+                  }
+                },
+                "required": ["section", "japanese", "english", "price", "order"],
+                "additionalProperties": false
+              }
+            }
+            """
+            
+            let json = try await ImageUnderstanding.extract(imageURL.path, schemaJSON: schema)
+            let data = Data(json.utf8)
+            let entries = try JSONDecoder().decode([MenuItem].self, from: data)
+            
+            menuItems = []
+            for item in entries {
+                let aMenu = MenuItem(
+                    section: katakanawords[item.section] ?? item.section,
+                    japanese: item.japanese,
+                    english: katakanawords[item.japanese] ?? item.english,
+                    price: item.price,
+                    order: item.order
+                )
+                menuItems.append(aMenu)
+            }
+
+        } catch {
+            print("Menu translation failed: \(error)")
+        }
+    }
+    
 }
 
 
-
-
-
 /*
- 
  
  //  ポーニマメフク Poni Mamefuku
  

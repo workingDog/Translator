@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C71BC78A307626C00068C75A /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = C71BC789307626C00068C75A /* README.md */; };
+		C778EDDD308C7CB100EB7CE0 /* ImageUnderstanding in Frameworks */ = {isa = PBXBuildFile; productRef = C778EDDC308C7CB100EB7CE0 /* ImageUnderstanding */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		C72377A43073787F0072AF1F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				C778EDDD308C7CB100EB7CE0 /* ImageUnderstanding in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -87,6 +89,9 @@
 				C72377A93073787F0072AF1F /* Translator */,
 			);
 			name = Translator;
+			packageProductDependencies = (
+				C778EDDC308C7CB100EB7CE0 /* ImageUnderstanding */,
+			);
 			productName = Translator;
 			productReference = C72377A73073787F0072AF1F /* Translator.app */;
 			productType = "com.apple.product-type.application";
@@ -116,6 +121,7 @@
 			mainGroup = C723779E3073787F0072AF1F;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				C778EDDB308C7CB100EB7CE0 /* XCRemoteSwiftPackageReference "swift-image-understanding" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C72377A83073787F0072AF1F /* Products */;
@@ -366,6 +372,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C778EDDB308C7CB100EB7CE0 /* XCRemoteSwiftPackageReference "swift-image-understanding" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/arraypress/swift-image-understanding";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C778EDDC308C7CB100EB7CE0 /* ImageUnderstanding */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C778EDDB308C7CB100EB7CE0 /* XCRemoteSwiftPackageReference "swift-image-understanding" */;
+			productName = ImageUnderstanding;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C723779F3073787F0072AF1F /* Project object */;
 	validationLevel = 1;

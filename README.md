@@ -40,6 +40,8 @@ loadAllwords() "katakana-eng.json" is now the merging of "google-ime-user-dictio
 adding the small data from somewhere and removing duplicates and the ";" in the English text.
 
 
+Experimenting with [Swift Image Understanding](https://github.com/arraypress/swift-image-understanding) , "A Swift library for asking Apple's on-device foundation model about images — describe, answer questions, and extract structured JSON."
+
 
 
 
