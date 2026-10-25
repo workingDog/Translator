@@ -18,7 +18,7 @@ struct TranslationView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(TranslatorModel.self) private var translator
     
-    @State private var mode: TransMode? = .ocr
+    @State private var mode: TransMode? = .ai
     
     let menuid = UUID()
     let title = "Menu \(Int.random(in: 1...1000))"

@@ -613,10 +613,35 @@ final class TranslatorModel {
 
 /*
  
- "id": {
-   "type": "string",
-   "description": "A unique identifier for this menu item, formatted as a UUID"
- },
+
+ func doDocAiTranslate() async {
+     guard let image = selectedImageItem?.uimage else { return }
+     let resizedImage = image.resizedToMaximumDimension(2500)
+     guard let imageData = resizedImage.jpegData(compressionQuality: 0.9) else { return }
+     let imageURL = FileManager.default.temporaryDirectory.appending(path: "\(UUID().uuidString).jpg")
+     
+     do {
+         try imageData.write(to: imageURL, options: .atomic)
+         
+         defer { try? FileManager.default.removeItem(at: imageURL) }
+         
+         let result = try await DocumentReader.read(contentsOf: imageURL)
+         
+         print(result.markdown)
+         for table in result.tables {
+             print(table.tsvRepresentation)
+         }
+         
+//            for page in result.pages {
+//                for block in page.blocks {
+//                    print(block.text)
+//                }
+//            }
+     } catch {
+         print("Menu recognition failed: \(error)")
+     }
+ }
+
  
  //  ポーニマメフク Poni Mamefuku
  
