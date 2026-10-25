@@ -9,7 +9,7 @@ import SwiftData
 import Translation
 import FoundationModels
 import Vision
-import ImageUnderstanding
+//import ImageUnderstanding
 
 
 @MainActor
@@ -545,6 +545,8 @@ final class TranslatorModel {
         }
     }
     
+    /*
+     // experiment with https://github.com/arraypress/swift-image-understanding
     func doAiTranslate() async {
         guard let image = selectedImageItem?.uimage else { return }
         let resizedImage = image.resizedToMaximumDimension(2500)
@@ -607,6 +609,7 @@ final class TranslatorModel {
             print("Menu translation failed: \(error)")
         }
     }
+    */
     
 }
 

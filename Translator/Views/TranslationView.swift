@@ -121,7 +121,8 @@ struct TranslationView: View {
         
     }
     
-    func doTranslation() {
+    /*
+    func doTranslation1() {
         Task {
             translator.isProcessing = true
             if mode == .ocr {
@@ -141,8 +142,9 @@ struct TranslationView: View {
             translator.isProcessing = false
         }
     }
+    */
 
-    func doTranslation1() {
+    func doTranslation() {
         Task {
             translator.isProcessing = true
             if mode == .ocr {
