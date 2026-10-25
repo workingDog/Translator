@@ -593,16 +593,14 @@ final class TranslatorModel {
             let data = Data(json.utf8)
             let entries = try JSONDecoder().decode([MenuItem].self, from: data)
             
-            menuItems = []
-            for item in entries {
-                let aMenu = MenuItem(
-                    section: katakanawords[item.section] ?? item.section,
-                    japanese: item.japanese,
-                    english: katakanawords[item.japanese] ?? item.english,
-                    price: item.price,
-                    order: item.order
+            menuItems = entries.map {
+                MenuItem(
+                    section: katakanawords[$0.section] ?? $0.section,
+                    japanese: $0.japanese,
+                    english: katakanawords[$0.japanese] ?? $0.english,
+                    price: $0.price,
+                    order: $0.order
                 )
-                menuItems.append(aMenu)
             }
 
         } catch {
@@ -614,6 +612,11 @@ final class TranslatorModel {
 
 
 /*
+ 
+ "id": {
+   "type": "string",
+   "description": "A unique identifier for this menu item, formatted as a UUID"
+ },
  
  //  ポーニマメフク Poni Mamefuku
  

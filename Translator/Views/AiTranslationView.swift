@@ -42,7 +42,7 @@ struct AiTranslationView: View {
                     
                     Text(section).font(.title2).bold()
                     
-                    ForEach(translator.menuItems.filter { $0.section == section }.sorted { ($0.order ?? 0) < ($1.order ?? 0) }, id: \.japanese) { item in
+                    ForEach(translator.menuItems.filter { $0.section == section }.sorted { ($0.order ?? 0) < ($1.order ?? 0) }) { item in
                         
                         HStack(alignment: .firstTextBaseline) {
                             VStack(alignment: .leading, spacing: 2) {
