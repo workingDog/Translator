@@ -28,45 +28,60 @@ struct SavedMenuView: View {
             
             if let image = UIImage(data: menu.imageData) {
                 Group {
-                    if mode == .ocr {
-                        orcView(image: image)
-                    } else {
-                        aiView(image: image)
-                    }
-                }
-                .toolbar {
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                        Button("OCR") {
-                            mode = .ocr
-                        }.tint(mode == .ocr ? .blue : .primary)
-                        
-                        Button("AI") {
-                            mode = .ai
-                        }.tint(mode == .ai ? .blue : .primary)
-                    }
-                    
-                    ToolbarItem(placement: .automatic) {
+                    VStack(alignment: .leading, spacing: 10) {
                         Button {
-                            shouldDelete = true
+                            showEditSheet = true
                         } label: {
-                            Image(systemName: "trash").font(.title2)
+                            Text(menu.title)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .lineLimit(2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(10)
+                        }.buttonStyle(.plain)
+                        
+                        if mode == .ocr {
+                            orcView(image: image)
+                        } else {
+                            aiView(image: image)
                         }
+                        
                     }
                 }
-                .alert("Rename translation", isPresented: $showEditSheet) {
-                    @Bindable var menu = menu
-                    TextField("Title", text: $menu.title)
-                    Button("OK") { }
-                }
-                .alert("Delete this translation?", isPresented: $shouldDelete) {
-                    Button("Delete", role: .destructive) {
-                        modelContext.delete(menu)
-                        try? modelContext.save()
-                        dismiss()
-                    }
-                    Button("Cancel", role: .cancel) { }
+                
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button("OCR") {
+                    mode = .ocr
+                }.tint(mode == .ocr ? .blue : .primary)
+                
+                Button("AI") {
+                    mode = .ai
+                }.tint(mode == .ai ? .blue : .primary)
+            }
+            
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    shouldDelete = true
+                } label: {
+                    Image(systemName: "trash").font(.title2)
                 }
             }
+        }
+        .alert("Rename translation", isPresented: $showEditSheet) {
+            @Bindable var menu = menu
+            TextField("Title", text: $menu.title)
+            Button("OK") { }
+        }
+        .alert("Delete this translation?", isPresented: $shouldDelete) {
+            Button("Delete", role: .destructive) {
+                modelContext.delete(menu)
+                try? modelContext.save()
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) { }
         }
     }
     
@@ -86,19 +101,6 @@ struct SavedMenuView: View {
         
         GeometryReader { geometry in
             VStack(alignment: .leading, spacing: 10) {
-                
-                Button {
-                    showEditSheet = true
-                } label: {
-                    Text(menu.title)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .lineLimit(2)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(10)
-                }
-                .buttonStyle(.plain)
-                
                 VStack(spacing: 15) {
                     HStack(spacing: 12) {
                         Image(systemName: "textformat.size").bold()
@@ -138,7 +140,7 @@ struct SavedMenuView: View {
     
     @ViewBuilder
     func aiView(image: UIImage) -> some View {
-
+        
         let savedAiData = decodeAiMenu(menu)
         
         var sections: [String] {
