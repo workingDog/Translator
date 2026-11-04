@@ -16,10 +16,12 @@ enum TransMode: String, CaseIterable {
 
 struct TranslationView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @Environment(TranslatorModel.self) private var translator
     
     @State private var mode: TransMode? = .ai
     @State private var showEditSheet = false
+    @State private var showSave = false
 
     @State private var title = "Menu \(Int.random(in: 1...1000))"
     @State private var resto = "Resto \(Int.random(in: 1...1000))"
@@ -41,13 +43,22 @@ struct TranslationView: View {
             }
             .padding(10)
             .padding(.top, 10)
-            .onDisappear {
-                translator.saveTranslatedMenu(
-                    title: title,
-                    resto: resto,
-                    menuid: menuid,
-                    modelContext: modelContext)
+            .confirmationDialog("Save Translation?",isPresented: $showSave,titleVisibility: .visible) {
+                Button("Save") {
+                    translator.saveTranslatedMenu(
+                        title: title,
+                        resto: resto,
+                        menuid: menuid,
+                        modelContext: modelContext)
+                    dismiss()
+                }
+                Button("Don't Save", role: .destructive) {
+                    dismiss()
+                }
+                Button("Cancel", role: .cancel) {
+                }
             }
+            .navigationBarBackButtonHidden(true)
             .toolbar {
                 
 //                ToolbarItem(placement: .topBarTrailing) {
@@ -79,6 +90,14 @@ struct TranslationView: View {
 //                    }.tint(mode == .ai ? .blue : .primary)
 //                    .disabled(translator.isProcessing)
 //                }
+                
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showSave = true
+                    } label: {
+                        Label("Back", systemImage: "chevron.left")
+                    }
+                }
 
                 ToolbarItem(placement: .principal) {
                     Button {
@@ -113,7 +132,7 @@ struct TranslationView: View {
                 }
                 
                 ToolbarItem(placement: .status) {
-                    Button(title) {
+                    Button(resto) {
                         showEditSheet = true
                     }
                 }
@@ -134,7 +153,7 @@ struct TranslationView: View {
         .alert("Rename menu", isPresented: $showEditSheet) {
             VStack {
                 TextField("Restaurant", text: $resto)
-                TextField("Menu type", text: $title)
+                TextField("Menu name", text: $title)
             }
             Button("OK") {
                 resto = resto.trim()
