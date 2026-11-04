@@ -41,26 +41,32 @@ struct TranslationView: View {
             }
             .padding(10)
             .padding(.top, 10)
-            
+            .onDisappear {
+                translator.saveTranslatedMenu(
+                    title: title,
+                    resto: resto,
+                    menuid: menuid,
+                    modelContext: modelContext)
+            }
             .toolbar {
                 
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        translator.saveTranslatedMenu(
-                            title: title,
-                            resto: resto,
-                            menuid: menuid,
-                            modelContext: modelContext)
-                    } label: {
-                        ZStack {
-                            Image(systemName: "star.fill").foregroundStyle(.yellow)
-                            Image(systemName: "star").foregroundStyle(.black)
-                        }
-                        .font(.title2)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(translator.isProcessing)
-                }
+//                ToolbarItem(placement: .topBarTrailing) {
+//                    Button {
+//                        translator.saveTranslatedMenu(
+//                            title: title,
+//                            resto: resto,
+//                            menuid: menuid,
+//                            modelContext: modelContext)
+//                    } label: {
+//                        ZStack {
+//                            Image(systemName: "star.fill").foregroundStyle(.yellow)
+//                            Image(systemName: "star").foregroundStyle(.black)
+//                        }
+//                        .font(.title2)
+//                    }
+//                    .buttonStyle(.plain)
+//                    .disabled(translator.isProcessing)
+//                }
                 
 //                ToolbarItemGroup(placement: .topBarTrailing) {
 //                    Button("OCR") {
