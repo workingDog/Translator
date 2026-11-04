@@ -19,7 +19,7 @@ struct SavedMenuView: View {
     @State private var shouldDelete = false
     @State private var showClean = false
     
-    @State private var mode: TransMode? = .ocr
+    @State private var mode: TransMode? = .ai
     
     var body: some View {
         
@@ -32,12 +32,14 @@ struct SavedMenuView: View {
                         Button {
                             showEditSheet = true
                         } label: {
-                            Text(menu.title)
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .lineLimit(2)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(10)
+                            VStack(alignment: .leading) {
+                                Text(menu.resto ?? "")
+                                Text(menu.title)
+                            }
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(10)
                         }.buttonStyle(.plain)
                         
                         if mode == .ocr {
@@ -52,15 +54,15 @@ struct SavedMenuView: View {
             }
         }
         .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button("OCR") {
-                    mode = .ocr
-                }.tint(mode == .ocr ? .blue : .primary)
-                
-                Button("AI") {
-                    mode = .ai
-                }.tint(mode == .ai ? .blue : .primary)
-            }
+//            ToolbarItemGroup(placement: .topBarTrailing) {
+//                Button("OCR") {
+//                    mode = .ocr
+//                }.tint(mode == .ocr ? .blue : .primary)
+//                
+//                Button("AI") {
+//                    mode = .ai
+//                }.tint(mode == .ai ? .blue : .primary)
+//            }
             
             ToolbarItem(placement: .automatic) {
                 Button {
@@ -70,12 +72,18 @@ struct SavedMenuView: View {
                 }
             }
         }
-        .alert("Rename translation", isPresented: $showEditSheet) {
+        .alert("Rename menu", isPresented: $showEditSheet) {
             @Bindable var menu = menu
-            TextField("Title", text: $menu.title)
+            VStack {
+                TextField("Restaurant", text: Binding(
+                    get: { menu.resto ?? "" },
+                    set: { menu.resto = $0.isEmpty ? nil : $0 }
+                ))
+                TextField("Menu type", text: $menu.title)
+            }
             Button("OK") { }
         }
-        .alert("Delete this translation?", isPresented: $shouldDelete) {
+        .alert("Delete this menu?", isPresented: $shouldDelete) {
             Button("Delete", role: .destructive) {
                 modelContext.delete(menu)
                 try? modelContext.save()
@@ -184,8 +192,10 @@ struct SavedMenuView: View {
                 }
                 .padding(10)
             }
+            .padding(.top, 20)
         } else {
-            Text("No data available").font(.title)
+            Text("No data available").font(.title).padding(.top, 30)
+            Spacer()
         }
     }
     

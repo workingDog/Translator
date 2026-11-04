@@ -143,7 +143,7 @@ final class TranslatorModel {
     }
     
     @MainActor
-    func saveTranslatedMenu(title: String, menuid: UUID, modelContext: ModelContext) {
+    func saveTranslatedMenu(title: String, resto: String, menuid: UUID, modelContext: ModelContext) {
         guard let imgItem = selectedImageItem else { return }
         guard let imageData = imgItem.getImage().jpegData(compressionQuality: 0.9) else { return }
         
@@ -159,6 +159,7 @@ final class TranslatorModel {
         do {
             if let savedMenu = try modelContext.fetch(descriptor).first {
                 savedMenu.title = title
+                savedMenu.resto = resto
                 savedMenu.imageData = imageData
                 savedMenu.ocrData = ocrData
                 savedMenu.aiData = aiData
@@ -166,6 +167,7 @@ final class TranslatorModel {
             } else {
                 let savedMenu = TranslatedMenu(
                     menuid: menuid,
+                    resto: resto,
                     title: title,
                     imageData: imageData,
                     ocrData: ocrData,

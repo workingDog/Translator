@@ -45,15 +45,15 @@ struct ContentView: View {
                 AppBackground().ignoresSafeArea()
                 
                 VStack(spacing: 10) {
-                    Text("Translator")
-                        .font(.system(size: 28, weight: .bold))
+                    Text("Menu translator")
+                        .font(.system(size: 24, weight: .bold))
                     
                     selectedImagesView
                     
                 }
                 .navigationDestination(item: $route) { route in
                     if route == .store {
-                        SavedTranslationView()
+                        MenuListView()
                     }
                     if route == .translation {
                         TranslationView()

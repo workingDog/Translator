@@ -19,18 +19,22 @@ struct TranslationView: View {
     @Environment(TranslatorModel.self) private var translator
     
     @State private var mode: TransMode? = .ai
+    @State private var showEditSheet = false
+
+    @State private var title = "Menu \(Int.random(in: 1...1000))"
+    @State private var resto = "Resto \(Int.random(in: 1...1000))"
     
     let menuid = UUID()
-    let title = "Menu \(Int.random(in: 1...1000))"
+    
     
     var body: some View {
         ZStack {
             AppBackground().ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 5) {
-                if mode == .ocr {
-                    EnglishView().padding(5)
-                }
+//                if mode == .ocr {
+//                    EnglishView().padding(5)
+//                }
                 if mode == .ai {
                     AiTranslationView()
                 }
@@ -44,6 +48,7 @@ struct TranslationView: View {
                     Button {
                         translator.saveTranslatedMenu(
                             title: title,
+                            resto: resto,
                             menuid: menuid,
                             modelContext: modelContext)
                     } label: {
@@ -57,27 +62,27 @@ struct TranslationView: View {
                     .disabled(translator.isProcessing)
                 }
                 
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button("OCR") {
-                        mode = .ocr
-                    }.tint(mode == .ocr ? .blue : .primary)
-                    .disabled(translator.isProcessing)
-                    
-                    Button("AI") {
-                        mode = .ai
-                    }.tint(mode == .ai ? .blue : .primary)
-                    .disabled(translator.isProcessing)
-                }
+//                ToolbarItemGroup(placement: .topBarTrailing) {
+//                    Button("OCR") {
+//                        mode = .ocr
+//                    }.tint(mode == .ocr ? .blue : .primary)
+//                    .disabled(translator.isProcessing)
+//                    
+//                    Button("AI") {
+//                        mode = .ai
+//                    }.tint(mode == .ai ? .blue : .primary)
+//                    .disabled(translator.isProcessing)
+//                }
 
                 ToolbarItem(placement: .principal) {
                     Button {
                         doTranslation()
                     } label: {
-                        VStack {
-                            Image(systemName: "translate")
-                            Text(mode?.rawValue ?? "")
-                        }
-                        .font(.title3)
+ //                       VStack {
+                            Image(systemName: "translate").font(.title3)
+//                            Text(mode?.rawValue ?? "")
+//                        }
+//                        .font(.title3)
                     }
                     .buttonStyle(.glass)
                     .disabled(translator.isProcessing)
@@ -102,7 +107,9 @@ struct TranslationView: View {
                 }
                 
                 ToolbarItem(placement: .status) {
-                    Text(title)
+                    Button(title) {
+                        showEditSheet = true
+                    }
                 }
                 
             }
@@ -118,7 +125,13 @@ struct TranslationView: View {
                 await translator.doAiProcess(using: session)
             }
         }
-        
+        .alert("Rename menu", isPresented: $showEditSheet) {
+            VStack {
+                TextField("Restaurant", text: $resto)
+                TextField("Menu type", text: $title)
+            }
+            Button("OK") { }
+        }
     }
     
     /*
