@@ -130,7 +130,10 @@ struct TranslationView: View {
                 TextField("Restaurant", text: $resto)
                 TextField("Menu type", text: $title)
             }
-            Button("OK") { }
+            Button("OK") {
+                resto = resto.trim()
+                title = title.trim()
+            }
         }
     }
     

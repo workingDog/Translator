@@ -33,7 +33,7 @@ struct SavedMenuView: View {
                             showEditSheet = true
                         } label: {
                             VStack(alignment: .leading) {
-                                Text(menu.resto ?? "")
+                                Text(menu.resto)
                                 Text(menu.title)
                             }
                             .font(.title2)
@@ -75,13 +75,13 @@ struct SavedMenuView: View {
         .alert("Rename menu", isPresented: $showEditSheet) {
             @Bindable var menu = menu
             VStack {
-                TextField("Restaurant", text: Binding(
-                    get: { menu.resto ?? "" },
-                    set: { menu.resto = $0.isEmpty ? nil : $0 }
-                ))
+                TextField("Restaurant", text: $menu.resto)
                 TextField("Menu type", text: $menu.title)
             }
-            Button("OK") { }
+            Button("OK") {
+                menu.resto = menu.resto.trim()
+                menu.title = menu.title.trim()
+            }
         }
         .alert("Delete this menu?", isPresented: $shouldDelete) {
             Button("Delete", role: .destructive) {

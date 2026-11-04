@@ -14,7 +14,7 @@ struct MenuListView: View {
     private var menus: [TranslatedMenu]
     
     private var groupedMenus: [(resto: String, menus: [TranslatedMenu])] {
-        let grouped = Dictionary(grouping: menus) { $0.resto ?? "Unknown restaurant" }
+        let grouped = Dictionary(grouping: menus) { $0.resto }
         return grouped.map { (resto: $0.key, menus: $0.value) }
             .sorted { $0.resto.localizedCaseInsensitiveCompare($1.resto) == .orderedAscending }
     }
@@ -83,79 +83,3 @@ struct MenuListView: View {
     }
     
 }
-
-
-
-/*
- 
- struct MenuListView: View {
-     
-     @Query(sort: \TranslatedMenu.createdAt, order: .reverse)
-     private var menus: [TranslatedMenu]
-     
-     private var groupedMenus: [(resto: String, menus: [TranslatedMenu])] {
-         let grouped = Dictionary(grouping: menus) { $0.resto ?? "Unknown restaurant" }
-         return grouped.map { (resto: $0.key, menus: $0.value) }
-             .sorted { $0.resto.localizedCaseInsensitiveCompare($1.resto) == .orderedAscending }
-     }
-     
-     var body: some View {
-         ZStack {
-             AppBackground().ignoresSafeArea()
-             
-             List {
-                 ForEach(groupedMenus, id: \.resto) { group in
-                     Section {
-                         ForEach(group.menus) { menu in
-                             NavigationLink {
-                                 SavedMenuView(menu: menu)
-                             } label: {
-                                 HStack {
-                                     if let image = UIImage(data: menu.imageData) {
-                                         Image(uiImage: image)
-                                             .resizable()
-                                             .scaledToFill()
-                                             .frame(width: 60, height: 60)
-                                             .clipShape(RoundedRectangle(cornerRadius: 8))
-                                     }
-                                     Text(menu.title)
-                                         .font(.headline)
-                                         .foregroundStyle(.primary)
-                                     Spacer()
-                                 }
-                                 .padding(8)
-                             }
-                             .listRowBackground(Color.clear)
-                             .listRowSeparator(.hidden)
-                         }
-                     } header: {
-                         HStack {
-                             Image(systemName: "fork.knife")
-                                 .foregroundStyle(.tint)
-                             Text(group.resto)
-                                 .font(.headline)
-                                 .foregroundStyle(.primary)
-                             Spacer()
-                             Text("\(group.menus.count)")
-                                 .font(.subheadline)
-                                 .foregroundStyle(.secondary)
-                         }
-                         .padding(.vertical, 8)
-                         .padding(.horizontal, 12)
-                         .background {
-                             RoundedRectangle(cornerRadius: 10)
-                                 .fill(Color.accentColor.opacity(0.15))
-                         }
-                     }
-                 }
-             }
-             .listStyle(.plain)
-             .scrollContentBackground(.hidden)
-             .navigationTitle("Menu list")
-             .navigationBarTitleDisplayMode(.inline)
-         }
-     }
-     
- }
-
- */

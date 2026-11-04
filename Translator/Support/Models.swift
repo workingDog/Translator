@@ -61,14 +61,14 @@ final class ImageItem: Identifiable {
 final class TranslatedMenu {
     var menuid: UUID
     
-    var resto: String?
+    var resto: String
     var title: String
     var imageData: Data
     var ocrData: Data?
     var aiData: Data?
     var createdAt: Date
 
-    init(menuid: UUID, resto: String? = nil, title: String, imageData: Data, ocrData: Data, aiData: Data? = nil) {
+    init(menuid: UUID, resto: String, title: String, imageData: Data, ocrData: Data, aiData: Data? = nil) {
         self.menuid = menuid
         self.resto = resto
         self.title = title
