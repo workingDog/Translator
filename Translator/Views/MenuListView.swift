@@ -13,10 +13,20 @@ struct MenuListView: View {
     @Query(sort: \TranslatedMenu.createdAt, order: .reverse)
     private var menus: [TranslatedMenu]
     
+    @State private var searchText = ""
+
     private var groupedMenus: [(resto: String, menus: [TranslatedMenu])] {
-        let grouped = Dictionary(grouping: menus) { $0.resto }
+        let filteredMenus = searchText.isEmpty
+            ? menus
+            : menus.filter {
+                $0.resto.trim().localizedCaseInsensitiveContains(searchText) ||
+                $0.title.trim().localizedCaseInsensitiveContains(searchText)
+            }
+        let grouped = Dictionary(grouping: filteredMenus) { $0.resto }
         return grouped.map { (resto: $0.key, menus: $0.value) }
-            .sorted { $0.resto.localizedCaseInsensitiveCompare($1.resto) == .orderedAscending }
+            .sorted {
+                $0.resto.trim().localizedCaseInsensitiveCompare($1.resto.trim()) == .orderedAscending
+            }
     }
     
     var body: some View {
@@ -75,8 +85,7 @@ struct MenuListView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
+            .searchable(text: $searchText, prompt: "Search restaurants")
             .navigationTitle("Menu list")
             .navigationBarTitleDisplayMode(.inline)
         }
