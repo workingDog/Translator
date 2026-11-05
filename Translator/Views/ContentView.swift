@@ -173,18 +173,7 @@ struct ContentView: View {
     private func deleteImage(at offsets: IndexSet) {
         selectedImages.remove(atOffsets: offsets)
     }
-    
-    private var photoPicker: some View {
-        PhotosPicker(
-            selection: $selectedPhoto,
-            matching: .images,
-            photoLibrary: .shared()
-        ) {
-            Label("Choose Menu Photo", systemImage: "photo")
-        }
-        .buttonStyle(.borderedProminent)
-    }
-    
+
     private func loadSelectedPhoto() async {
         guard let selectedPhoto else {
             return
@@ -238,16 +227,7 @@ struct ContentView: View {
 //    }
     
 //    func doTest2() {
-//        do {
-//            try translator.loadMenuWords()
-//            print("---> loanwords: \(translator.loanwords.count)" )
-//            for item in translator.loanwords.prefix(10) {
-//                print("---> katakana: \(item.key) english: \(item.value) ")
-//            }
-//            print()
-//        } catch {
-//            print(error)
-//        }
+//
 //    }
     
     

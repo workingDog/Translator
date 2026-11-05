@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import PhotosUI
+import ImageIO
 
 
 struct CameraView: UIViewControllerRepresentable {
@@ -49,10 +50,18 @@ class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerContro
         self._cameraCancel = cameraCancel
         self.dismiss = dismiss
     }
-    
+
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
         guard let selectedImage = info[.originalImage] as? UIImage else { return }
+        
+//        if let metadata = info[.mediaMetadata] as? [String: Any],
+//           let gps = metadata[kCGImagePropertyGPSDictionary as String] as? [String: Any] {
+//            print("GPS metadata:", gps)
+//        } else {
+//            print("The picker did not provide GPS metadata")
+//        }
+
         self.selectedImages.append(ImageItem(uimage: selectedImage))
         self.dismiss()
     }

@@ -18,6 +18,7 @@ struct SavedMenuView: View {
     @State private var showEditSheet = false
     @State private var shouldDelete = false
     @State private var showClean = false
+    @State private var showImage = false
     
     @State private var mode: TransMode? = .ai
     
@@ -45,7 +46,15 @@ struct SavedMenuView: View {
                         if mode == .ocr {
                             orcView(image: image)
                         } else {
-                            aiView(image: image)
+                            if showImage {
+                                ZoomableImageView(image: image, items: [])
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .zIndex(0)
+                                    .clipped()
+                                    .ignoresSafeArea(.container, edges: .bottom)
+                            } else {
+                                aiView(image: image)
+                            }
                         }
                         
                     }
@@ -63,6 +72,14 @@ struct SavedMenuView: View {
 //                    mode = .ai
 //                }.tint(mode == .ai ? .blue : .primary)
 //            }
+            
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    showImage.toggle()
+                } label: {
+                    Image(systemName: showImage ? "translate" : "photo").font(.title2)
+                }
+            }
             
             ToolbarItem(placement: .automatic) {
                 Button {

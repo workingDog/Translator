@@ -14,14 +14,14 @@ struct MenuListView: View {
     private var menus: [TranslatedMenu]
     
     @State private var searchText = ""
-
+    
     private var groupedMenus: [(resto: String, menus: [TranslatedMenu])] {
         let filteredMenus = searchText.isEmpty
-            ? menus
-            : menus.filter {
-                $0.resto.trim().localizedCaseInsensitiveContains(searchText) ||
-                $0.title.trim().localizedCaseInsensitiveContains(searchText)
-            }
+        ? menus
+        : menus.filter {
+            $0.resto.trim().localizedCaseInsensitiveContains(searchText) ||
+            $0.title.trim().localizedCaseInsensitiveContains(searchText)
+        }
         let grouped = Dictionary(grouping: filteredMenus) { $0.resto }
         return grouped.map { (resto: $0.key, menus: $0.value) }
             .sorted {
@@ -63,10 +63,20 @@ struct MenuListView: View {
                             Image(systemName: "fork.knife")
                                 .font(.title)
                                 .foregroundStyle(.tint)
-                            Text(group.resto)
-                                .font(.headline)
-                                .foregroundStyle(.primary)
+                            
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(group.resto)
+                                    .font(.headline)
+                                
+                                if let date = group.menus.map(\.createdAt).max() {
+                                    Text(date, format: .dateTime.day().month(.abbreviated).year())
+                                        .font(.caption)
+                                }
+                            }
+                            .foregroundStyle(.primary)
+                            
                             Spacer()
+                            
                             Text("\(group.menus.count)")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)

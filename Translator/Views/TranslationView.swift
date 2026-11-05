@@ -43,7 +43,7 @@ struct TranslationView: View {
             }
             .padding(10)
             .padding(.top, 10)
-            .confirmationDialog("Save Translation?",isPresented: $showSave,titleVisibility: .visible) {
+            .confirmationDialog("Save menu?",isPresented: $showSave,titleVisibility: .visible) {
                 Button("Save") {
                     translator.saveTranslatedMenu(
                         title: title,
